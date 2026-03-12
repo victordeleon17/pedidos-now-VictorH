@@ -1,2 +1,6 @@
 // Exportar modelos de asignaciones
-module.exports = {};
+const AsignacionEntrega = require('./asignacion-entrega.model');
+
+module.exports = {
+    AsignacionEntrega
+};

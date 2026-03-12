@@ -1,2 +1,6 @@
 // Exportar modelos de entregas
-module.exports = {};
+const Entrega = require('./entrega.model');
+
+module.exports = {
+    Entrega
+};

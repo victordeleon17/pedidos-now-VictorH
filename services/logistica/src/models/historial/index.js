@@ -1,2 +1,6 @@
 // Exportar modelos de historial
-module.exports = {};
+const HistorialEstadoEntrega = require('./historial-estado.model');
+
+module.exports = {
+    HistorialEstadoEntrega
+};

@@ -1,2 +1,6 @@
 // Exportar modelos de incidencias
-module.exports = {};
+const IncidenciaEntrega = require('./incidencia.model');
+
+module.exports = {
+    IncidenciaEntrega
+};
