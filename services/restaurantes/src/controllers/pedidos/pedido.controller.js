@@ -19,11 +19,12 @@ const ESTADO = {
 // GET /api/pedidos
 exports.getAll = async (req, res, next) => {
   try {
-    const { restaurante_id, cliente_id, estado_id } = req.query;
-    const where = {};
-    if (restaurante_id) where.restaurante_id = restaurante_id;
-    if (cliente_id)     where.cliente_id     = cliente_id;
-    if (estado_id)      where.estado_id      = estado_id;
+    const { restaurante_id } = req.params;
+    const { cliente_id, estado_id } = req.query;
+    
+    const where = { restaurante_id };
+    if (cliente_id) where.cliente_id = cliente_id;
+    if (estado_id) where.estado_id = estado_id;
 
     const pedidos = await Pedido.findAll({
       where,
@@ -40,22 +41,23 @@ exports.getAll = async (req, res, next) => {
 // GET /api/pedidos/:id
 exports.getById = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
 
-    const pedido = await Pedido.findByPk(id, {
+    const pedido = await Pedido.findOne({
+      where: { id, restaurante_id },
       include: [
         { model: EstadoPedido, as: 'estado' },
         { model: DetallePedido, as: 'detalles' },
         {
           model: HistorialEstadosPedido,
-          as: 'historial',
+          as: 'historial_estados',
           include: [{ model: EstadoPedido, as: 'estado' }]
         }
       ]
     });
 
     if (!pedido) {
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
     }
 
     res.json({ success: true, data: pedido });
@@ -68,14 +70,36 @@ exports.getById = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { restaurante_id, cliente_id, direccion_entrega, notas, descuento_aplicado, items } = req.body;
+    const { restaurante_id } = req.params;
+    const { cliente_id, direccion_entrega, notas, descuento_aplicado, items } = req.body;
 
-    if (!restaurante_id || !cliente_id || !direccion_entrega || !items || items.length === 0) {
+    if (!cliente_id || !direccion_entrega || !items || items.length === 0) {
       await t.rollback();
       return res.status(400).json({
         success: false,
-        message: 'Faltan campos: restaurante_id, cliente_id, direccion_entrega, items'
+        message: 'Faltan campos: cliente_id, direccion_entrega, items'
       });
+    }
+
+    // Verificar que el restaurante existe
+    const [restauranteRows] = await sequelize.query(
+      'SELECT id, nombre, activo, disponible FROM restaurantes WHERE id = :id',
+      { replacements: { id: restaurante_id }, transaction: t }
+    );
+
+    if (restauranteRows.length === 0) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Restaurante no encontrado' });
+    }
+
+    if (!restauranteRows[0].activo) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'El restaurante está inactivo' });
+    }
+
+    if (!restauranteRows[0].disponible) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'El restaurante no está disponible en este momento' });
     }
 
     let subtotal = 0;
@@ -168,7 +192,7 @@ exports.create = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: 'Pedido creado exitosamente',
-      data: { pedido_id: pedido.id, subtotal, descuento_aplicado: desc_aplicado, total, cantidad_items: itemsValidados.length }
+      data: { pedido_id: pedido.id, restaurante_id, subtotal, descuento_aplicado: desc_aplicado, total, cantidad_items: itemsValidados.length }
     });
   } catch (error) {
     await t.rollback();
@@ -179,12 +203,15 @@ exports.create = async (req, res, next) => {
 // PUT /api/pedidos/:id
 exports.update = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const { direccion_entrega, notas, repartidor_id, cobro_id } = req.body;
 
-    const pedido = await Pedido.findByPk(id);
+    const pedido = await Pedido.findOne({
+      where: { id, restaurante_id }
+    });
+
     if (!pedido) {
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
     }
 
     await pedido.update({
@@ -205,7 +232,7 @@ exports.update = async (req, res, next) => {
 exports.cambiarEstado = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const { estado_id, motivo } = req.body;
 
     if (!estado_id) {
@@ -213,11 +240,16 @@ exports.cambiarEstado = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'estado_id es requerido' });
     }
 
-    const pedido = await Pedido.findByPk(id, { transaction: t });
+    const pedido = await Pedido.findOne({
+      where: { id, restaurante_id },
+      transaction: t
+    });
+
     if (!pedido) {
       await t.rollback();
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
     }
+
     if (pedido.estado_id === ESTADO.CANCELADO) {
       await t.rollback();
       return res.status(400).json({ success: false, message: 'No se puede cambiar estado de un pedido cancelado' });

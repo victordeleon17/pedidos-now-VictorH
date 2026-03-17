@@ -2,11 +2,14 @@ const { HistorialEstadosPedido, EstadoPedido, Pedido } = require('../../models')
 
 exports.getByPedido = async (req, res, next) => {
   try {
-    const { pedido_id } = req.params;
+    const { restaurante_id, pedido_id } = req.params;
 
-    const pedido = await Pedido.findByPk(pedido_id);
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id }
+    });
+
     if (!pedido)
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado ' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
 
     const historial = await HistorialEstadosPedido.findAll({
       where: { pedido_id },

@@ -40,9 +40,10 @@ exports.getAll = async (req, res, next) => {
 // Obtener un combo por ID
 exports.getById = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
 
-    const combo = await Combo.findByPk(id, {
+    const combo = await Combo.findOne({
+      where: { id, restaurante_id },
       include: [
         {
           model: Restaurante,
@@ -68,7 +69,7 @@ exports.getById = async (req, res, next) => {
     if (!combo) {
       return res.status(404).json({
         success: false,
-        message: 'Combo no encontrado'
+        message: 'Combo no encontrado en este restaurante'
       });
     }
 
@@ -84,14 +85,23 @@ exports.getById = async (req, res, next) => {
 // Crear un nuevo combo
 exports.create = async (req, res, next) => {
   try {
+    const { restaurante_id } = req.params;
     const {
-      restaurante_id,
       tipo_combo_id,
       nombre,
       descripcion,
       precio,
       productos
     } = req.body;
+
+    // Verificar que el restaurante existe
+    const restaurante = await Restaurante.findByPk(restaurante_id);
+    if (!restaurante) {
+      return res.status(404).json({
+        success: false,
+        message: 'Restaurante no encontrado'
+      });
+    }
 
     const combo = await Combo.create({
       restaurante_id,
@@ -126,7 +136,7 @@ exports.create = async (req, res, next) => {
 // Actualizar un combo existente
 exports.update = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const {
       tipo_combo_id,
       nombre,
@@ -134,12 +144,14 @@ exports.update = async (req, res, next) => {
       precio
     } = req.body;
 
-    const combo = await Combo.findByPk(id);
+    const combo = await Combo.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!combo) {
       return res.status(404).json({
         success: false,
-        message: 'Combo no encontrado'
+        message: 'Combo no encontrado en este restaurante'
       });
     }
 
@@ -164,14 +176,16 @@ exports.update = async (req, res, next) => {
 // Eliminar (inactivar) un combo
 exports.delete = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
 
-    const combo = await Combo.findByPk(id);
+    const combo = await Combo.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!combo) {
       return res.status(404).json({
         success: false,
-        message: 'Combo no encontrado'
+        message: 'Combo no encontrado en este restaurante'
       });
     }
 
@@ -192,15 +206,17 @@ exports.delete = async (req, res, next) => {
 // Activar/desactivar un combo
 exports.toggleActivo = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const { activo } = req.body;
 
-    const combo = await Combo.findByPk(id);
+    const combo = await Combo.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!combo) {
       return res.status(404).json({
         success: false,
-        message: 'Combo no encontrado'
+        message: 'Combo no encontrado en este restaurante'
       });
     }
 
@@ -253,15 +269,17 @@ exports.getByRestaurante = async (req, res, next) => {
 // Agregar productos a un combo
 exports.addProductos = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const { productos } = req.body;
 
-    const combo = await Combo.findByPk(id);
+    const combo = await Combo.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!combo) {
       return res.status(404).json({
         success: false,
-        message: 'Combo no encontrado'
+        message: 'Combo no encontrado en este restaurante'
       });
     }
 
@@ -292,7 +310,19 @@ exports.addProductos = async (req, res, next) => {
 // Remover productos de un combo
 exports.removeProducto = async (req, res, next) => {
   try {
-    const { id, producto_id } = req.params;
+    const { restaurante_id, id, producto_id } = req.params;
+
+    // Verificar que el combo pertenece al restaurante
+    const combo = await Combo.findOne({
+      where: { id, restaurante_id }
+    });
+
+    if (!combo) {
+      return res.status(404).json({
+        success: false,
+        message: 'Combo no encontrado en este restaurante'
+      });
+    }
 
     const comboProducto = await ComboProducto.findOne({
       where: {

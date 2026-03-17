@@ -45,7 +45,7 @@ exports.getByPedido = async (req, res, next) => {
 exports.cancelar = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { pedido_id } = req.params;
+    const { restaurante_id, pedido_id } = req.params;
     const { cancelado_por, motivo } = req.body;
 
     const validos = ['cliente', 'restaurante', 'repartidor', 'sistema'];
@@ -58,14 +58,15 @@ exports.cancelar = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'El motivo es requerido' });
     }
 
-    const pedido = await Pedido.findByPk(pedido_id, {
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id },
       include: [{ model: EstadoPedido, as: 'estado' }],
       transaction: t
     });
 
     if (!pedido) {
       await t.rollback();
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
     }
     if (pedido.estado_id === ESTADO_CANCELADO) {
       await t.rollback();
