@@ -1,10 +1,10 @@
 {
-  "endpoint": "PUT http://localhost:3000/api/horarios/:id",
-  "descripcion": "Actualizar un horario existente",
+  "endpoint": "PUT http://localhost:3000/api/restaurantes/1/horarios/:id",
+  "descripcion": "Actualizar un horario de un restaurante",
   "headers": {
     "Content-Type": "application/json"
   },
-  "ejemplo": "PUT http://localhost:3000/api/horarios/1",
+  "ejemplo": "PUT http://localhost:3000/api/restaurantes/1/horarios/1",
   "body": {
     "dia_semana": 1,
     "hora_apertura": "07:00:00",

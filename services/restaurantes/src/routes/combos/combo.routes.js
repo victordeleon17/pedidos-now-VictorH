@@ -1,32 +1,29 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const comboController = require('../../controllers/combos/combo.controller');
 
-// GET /api/combos - Obtener todos los combos
-router.get('/', comboController.getAll);
+// GET /restaurantes/:restaurante_id/combos - Obtener combos del restaurante
+router.get('/', comboController.getByRestaurante);
 
-// GET /api/combos/:id - Obtener un combo por ID
-router.get('/:id', comboController.getById);
-
-// GET /api/combos/restaurante/:restaurante_id - Obtener combos por restaurante
-router.get('/restaurante/:restaurante_id', comboController.getByRestaurante);
-
-// POST /api/combos - Crear un nuevo combo
+// POST /restaurantes/:restaurante_id/combos - Crear combo en el restaurante
 router.post('/', comboController.create);
 
-// PUT /api/combos/:id - Actualizar un combo
+// GET /restaurantes/:restaurante_id/combos/:id - Obtener combo específico
+router.get('/:id', comboController.getById);
+
+// PUT /restaurantes/:restaurante_id/combos/:id - Actualizar combo
 router.put('/:id', comboController.update);
 
-// DELETE /api/combos/:id - Eliminar (inactivar) un combo
+// DELETE /restaurantes/:restaurante_id/combos/:id - Inactivar combo
 router.delete('/:id', comboController.delete);
 
-// PATCH /api/combos/:id/activo - Activar/desactivar un combo
+// PATCH /restaurantes/:restaurante_id/combos/:id/activo - Activar/desactivar
 router.patch('/:id/activo', comboController.toggleActivo);
 
-// POST /api/combos/:id/productos - Agregar productos a un combo
+// POST /restaurantes/:restaurante_id/combos/:id/productos - Agregar productos al combo
 router.post('/:id/productos', comboController.addProductos);
 
-// DELETE /api/combos/:id/productos/:producto_id - Remover producto de un combo
+// DELETE /restaurantes/:restaurante_id/combos/:id/productos/:producto_id - Remover producto
 router.delete('/:id/productos/:producto_id', comboController.removeProducto);
 
 module.exports = router;

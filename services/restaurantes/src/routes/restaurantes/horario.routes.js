@@ -1,26 +1,23 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const horarioController = require('../../controllers/restaurantes/horario.controller');
 
-// GET /api/horarios - Obtener todos los horarios
-router.get('/', horarioController.getAll);
+// GET /restaurantes/:restaurante_id/horarios - Obtener horarios del restaurante
+router.get('/', horarioController.getByRestaurante);
 
-// GET /api/horarios/:id - Obtener un horario por ID
-router.get('/:id', horarioController.getById);
-
-// GET /api/horarios/restaurante/:restaurante_id - Obtener horarios por restaurante
-router.get('/restaurante/:restaurante_id', horarioController.getByRestaurante);
-
-// POST /api/horarios - Crear un nuevo horario
+// POST /restaurantes/:restaurante_id/horarios - Crear horario en el restaurante
 router.post('/', horarioController.create);
 
-// PUT /api/horarios/:id - Actualizar un horario
+// GET /restaurantes/:restaurante_id/horarios/:id - Obtener horario específico
+router.get('/:id', horarioController.getById);
+
+// PUT /restaurantes/:restaurante_id/horarios/:id - Actualizar horario
 router.put('/:id', horarioController.update);
 
-// DELETE /api/horarios/:id - Eliminar (inactivar) un horario
+// DELETE /restaurantes/:restaurante_id/horarios/:id - Inactivar horario
 router.delete('/:id', horarioController.delete);
 
-// PATCH /api/horarios/:id/activo - Activar/Desactivar un horario
+// PATCH /restaurantes/:restaurante_id/horarios/:id/activo - Activar/desactivar
 router.patch('/:id/activo', horarioController.toggleActivo);
 
 module.exports = router;

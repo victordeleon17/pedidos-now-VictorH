@@ -1,10 +1,10 @@
 {
-  "endpoint": "GET http://localhost:3000/api/horarios/:id",
-  "descripcion": "Obtener un horario específico por ID",
+  "endpoint": "GET http://localhost:3000/api/restaurantes/1/horarios/:id",
+  "descripcion": "Obtener un horario específico de un restaurante",
   "headers": {
     "Content-Type": "application/json"
   },
-  "ejemplo": "GET http://localhost:3000/api/horarios/1",
+  "ejemplo": "GET http://localhost:3000/api/restaurantes/1/horarios/1",
   "respuesta_esperada": {
     "success": true,
     "data": {
@@ -13,11 +13,7 @@
       "dia_semana": 1,
       "hora_apertura": "08:00:00",
       "hora_cierre": "22:00:00",
-      "activo": true,
-      "restaurante": {
-        "id": 1,
-        "nombre": "Restaurante El Buen Sabor"
-      }
+      "activo": true
     }
   }
 }

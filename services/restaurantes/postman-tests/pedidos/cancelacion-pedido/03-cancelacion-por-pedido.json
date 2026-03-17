@@ -1,5 +1,5 @@
 {
-  "endpoint": "GET http://localhost:3000/api/pedidos/:pedido_id/cancelacion",
+  "endpoint": "GET http://localhost:3000/api/restaurantes/1/pedidos/:pedido_id/cancelacion",
   "descripcion": "Obtener la cancelación asociada a un pedido específico",
   "ejemplo": "GET http://localhost:3000/api/pedidos/3/cancelacion",
   "headers": {},

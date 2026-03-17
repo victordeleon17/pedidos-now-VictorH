@@ -1,6 +1,6 @@
 {
-  "endpoint": "GET http://localhost:3000/api/productos/1",
-  "descripcion": "Obtener un producto específico por ID",
+  "endpoint": "GET http://localhost:3000/api/restaurantes/1/productos/1",
+  "descripcion": "Obtener un producto específico de un restaurante",
   "headers": {
     "Content-Type": "application/json"
   },

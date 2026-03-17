@@ -1,7 +1,7 @@
 {
-  "endpoint": "POST http://localhost:3000/api/pedidos/:pedido_id/detalles",
+  "endpoint": "POST http://localhost:3000/api/restaurantes/1/pedidos/:pedido_id/detalles",
   "descripcion": "Agregar un combo como ítem al pedido.",
-  "ejemplo": "POST http://localhost:3000/api/pedidos/1/detalles",
+  "ejemplo": "POST http://localhost:3000/api/restaurantes/1/pedidos/1/detalles",
   "headers": {
     "Content-Type": "application/json"
   },

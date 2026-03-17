@@ -1,26 +1,29 @@
 const express = require('express');
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 const productoController = require('../../controllers/productos/producto.controller');
 
-// GET /api/productos - Obtener todos los productos
-router.get('/', productoController.getAll);
+// Importar subrutas
+const precioRoutes = require('../precios/precio.routes');
 
-// GET /api/productos/:id - Obtener un producto por ID
-router.get('/:id', productoController.getById);
+// GET /restaurantes/:restaurante_id/productos - Obtener productos del restaurante
+router.get('/', productoController.getByRestaurante);
 
-// GET /api/productos/restaurante/:restaurante_id - Obtener productos por restaurante
-router.get('/restaurante/:restaurante_id', productoController.getByRestaurante);
-
-// POST /api/productos - Crear un nuevo producto
+// POST /restaurantes/:restaurante_id/productos - Crear producto en el restaurante
 router.post('/', productoController.create);
 
-// PUT /api/productos/:id - Actualizar un producto
+// GET /restaurantes/:restaurante_id/productos/:id - Obtener producto específico
+router.get('/:id', productoController.getById);
+
+// PUT /restaurantes/:restaurante_id/productos/:id - Actualizar producto
 router.put('/:id', productoController.update);
 
-// DELETE /api/productos/:id - Eliminar (inactivar) un producto
+// DELETE /restaurantes/:restaurante_id/productos/:id - Inactivar producto
 router.delete('/:id', productoController.delete);
 
-// PATCH /api/productos/:id/activo - Activar/desactivar un producto
+// PATCH /restaurantes/:restaurante_id/productos/:id/activo - Activar/desactivar
 router.patch('/:id/activo', productoController.toggleActivo);
+
+// Subrutas de precios: /restaurantes/:restaurante_id/productos/:producto_id/precio/*
+router.use('/:producto_id/precio', precioRoutes);
 
 module.exports = router;
