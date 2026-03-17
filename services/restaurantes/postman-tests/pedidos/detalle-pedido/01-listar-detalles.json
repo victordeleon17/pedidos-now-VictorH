@@ -1,7 +1,7 @@
 {
-  "endpoint": "GET http://localhost:3000/api/pedidos/:pedido_id/detalles",
-  "descripcion": "Listar todos los ítems (detalles) de un pedido específico",
-  "ejemplo": "GET http://localhost:3000/api/pedidos/1/detalles",
+  "endpoint": "GET http://localhost:3000/api/restaurantes/1/pedidos/:pedido_id/detalles",
+  "descripcion": "Listar todos los ítems (detalles) de un pedido de un restaurante",
+  "ejemplo": "GET http://localhost:3000/api/restaurantes/1/pedidos/1/detalles",
   "headers": {},
   "body": null,
   "respuesta_esperada": {
@@ -31,10 +31,10 @@
     "count": 2
   },
   "caso_error_pedido_no_existe": {
-    "endpoint": "GET http://localhost:3000/api/pedidos/9999/detalles",
+    "endpoint": "GET http://localhost:3000/api/restaurantes/1/pedidos/9999/detalles",
     "respuesta": {
       "success": false,
-      "message": "Pedido no encontrado"
+      "message": "Pedido no encontrado en este restaurante"
     }
   }
 }

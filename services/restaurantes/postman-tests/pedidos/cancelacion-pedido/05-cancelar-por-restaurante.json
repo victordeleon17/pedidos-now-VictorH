@@ -1,5 +1,5 @@
 {
-  "endpoint": "POST http://localhost:3000/api/pedidos/:pedido_id/cancelacion/cancelar",
+  "endpoint": "POST http://localhost:3000/api/restaurantes/1/pedidos/:pedido_id/cancelacion/cancelar",
   "descripcion": "Cancelar un pedido desde el lado del restaurante. Aplica multa del 10% si el pedido está en estado 2, 3, 4 o 5.",
   "ejemplo": "POST http://localhost:3000/api/pedidos/4/cancelacion/cancelar",
   "headers": {

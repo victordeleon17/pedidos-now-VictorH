@@ -1,7 +1,7 @@
 {
-  "endpoint": "GET http://localhost:3000/api/pedidos/:pedido_id/detalles/:id",
+  "endpoint": "GET http://localhost:3000/api/restaurantes/1/pedidos/:pedido_id/detalles/:id",
   "descripcion": "Obtener un ítem (detalle) específico de un pedido",
-  "ejemplo": "GET http://localhost:3000/api/pedidos/1/detalles/1",
+  "ejemplo": "GET http://localhost:3000/api/restaurantes/1/pedidos/1/detalles/1",
   "headers": {},
   "body": null,
   "respuesta_esperada": {

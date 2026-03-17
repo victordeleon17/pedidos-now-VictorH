@@ -1,21 +1,16 @@
 {
-  "endpoint": "GET http://localhost:3000/api/horarios",
-  "descripcion": "Obtener todos los horarios con filtros opcionales",
+  "endpoint": "GET http://localhost:3000/api/restaurantes/1/horarios",
+  "descripcion": "Obtener todos los horarios de un restaurante",
   "headers": {
     "Content-Type": "application/json"
   },
   "query_params": {
-    "restaurante_id": "1",
-    "dia_semana": "1",
     "activo": "true"
   },
-  "nota": "Los query params son opcionales. Se pueden combinar o usar ninguno",
+  "nota": "Los horarios ahora se obtienen por restaurante_id en la URL",
   "ejemplos": [
-    "GET /api/horarios - Todos los horarios",
-    "GET /api/horarios?restaurante_id=1 - Horarios del restaurante 1",
-    "GET /api/horarios?dia_semana=0 - Horarios de lunes",
-    "GET /api/horarios?activo=true - Solo horarios activos",
-    "GET /api/horarios?restaurante_id=1&activo=true - Combinación de filtros"
+    "GET /api/restaurantes/1/horarios - Todos los horarios del restaurante",
+    "GET /api/restaurantes/1/horarios?activo=true - Solo horarios activos"
   ],
   "respuesta_esperada": {
     "success": true,
@@ -26,11 +21,7 @@
         "dia_semana": 1,
         "hora_apertura": "08:00:00",
         "hora_cierre": "22:00:00",
-        "activo": true,
-        "restaurante": {
-          "id": 1,
-          "nombre": "Restaurante El Buen Sabor"
-        }
+        "activo": true
       }
     ],
     "count": 1

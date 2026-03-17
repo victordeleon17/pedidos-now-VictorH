@@ -1,7 +1,7 @@
 {
-  "endpoint": "PUT http://localhost:3000/api/pedidos/:pedido_id/detalles/:id",
+  "endpoint": "PUT http://localhost:3000/api/restaurantes/1/pedidos/:pedido_id/detalles/:id",
   "descripcion": "Actualizar cantidad y/o descuento de un ítem del pedido. Recalcula subtotal y total.",
-  "ejemplo": "PUT http://localhost:3000/api/pedidos/1/detalles/1",
+  "ejemplo": "PUT http://localhost:3000/api/restaurantes/1/pedidos/1/detalles/1",
   "headers": {
     "Content-Type": "application/json"
   },
