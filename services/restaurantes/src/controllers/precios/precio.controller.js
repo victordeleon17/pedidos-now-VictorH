@@ -4,7 +4,19 @@ const { Op } = require('sequelize');
 // Obtener historial de precios de un producto
 exports.getHistorialByProducto = async (req, res, next) => {
   try {
-    const { producto_id } = req.params;
+    const { restaurante_id, producto_id } = req.params;
+
+    // Verificar que el producto pertenece al restaurante
+    const producto = await Producto.findOne({
+      where: { id: producto_id, restaurante_id }
+    });
+
+    if (!producto) {
+      return res.status(404).json({
+        success: false,
+        message: 'Producto no encontrado en este restaurante'
+      });
+    }
 
     const historial = await HistorialPreciosProducto.findAll({
       where: { producto_id },
@@ -31,16 +43,17 @@ exports.getHistorialByProducto = async (req, res, next) => {
 // Obtener precio actual de un producto
 exports.getPrecioActual = async (req, res, next) => {
   try {
-    const { producto_id } = req.params;
+    const { restaurante_id, producto_id } = req.params;
 
-    const producto = await Producto.findByPk(producto_id, {
+    const producto = await Producto.findOne({
+      where: { id: producto_id, restaurante_id },
       attributes: ['id', 'nombre', 'precio']
     });
 
     if (!producto) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 
@@ -60,7 +73,7 @@ exports.getPrecioActual = async (req, res, next) => {
 // Actualizar precio de un producto y registrar en historial
 exports.actualizarPrecio = async (req, res, next) => {
   try {
-    const { producto_id } = req.params;
+    const { restaurante_id, producto_id } = req.params;
     const { precio_nuevo, motivo } = req.body;
 
     if (!precio_nuevo || precio_nuevo <= 0) {
@@ -70,12 +83,14 @@ exports.actualizarPrecio = async (req, res, next) => {
       });
     }
 
-    const producto = await Producto.findByPk(producto_id);
+    const producto = await Producto.findOne({
+      where: { id: producto_id, restaurante_id }
+    });
 
     if (!producto) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 
@@ -149,13 +164,25 @@ exports.getHistorialByFecha = async (req, res, next) => {
 // Comparar precios entre dos fechas
 exports.compararPrecios = async (req, res, next) => {
   try {
-    const { producto_id } = req.params;
+    const { restaurante_id, producto_id } = req.params;
     const { fecha_inicio, fecha_fin } = req.query;
 
     if (!fecha_inicio || !fecha_fin) {
       return res.status(400).json({
         success: false,
         message: 'Se requieren fecha_inicio y fecha_fin'
+      });
+    }
+
+    // Verificar que el producto pertenece al restaurante
+    const producto = await Producto.findOne({
+      where: { id: producto_id, restaurante_id }
+    });
+
+    if (!producto) {
+      return res.status(404).json({
+        success: false,
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 

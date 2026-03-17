@@ -40,9 +40,10 @@ exports.getAll = async (req, res, next) => {
 // Obtener un producto por ID
 exports.getById = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
 
-    const producto = await Producto.findByPk(id, {
+    const producto = await Producto.findOne({
+      where: { id, restaurante_id },
       include: [
         {
           model: Restaurante,
@@ -60,7 +61,7 @@ exports.getById = async (req, res, next) => {
     if (!producto) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 
@@ -76,14 +77,23 @@ exports.getById = async (req, res, next) => {
 // Crear un nuevo producto
 exports.create = async (req, res, next) => {
   try {
+    const { restaurante_id } = req.params;
     const {
-      restaurante_id,
       tipo_producto_id,
       nombre,
       descripcion,
       imagen_url,
       precio
     } = req.body;
+
+    // Verificar que el restaurante existe
+    const restaurante = await Restaurante.findByPk(restaurante_id);
+    if (!restaurante) {
+      return res.status(404).json({
+        success: false,
+        message: 'Restaurante no encontrado'
+      });
+    }
 
     const producto = await Producto.create({
       restaurante_id,
@@ -109,7 +119,7 @@ exports.create = async (req, res, next) => {
 // Actualizar un producto existente
 exports.update = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const {
       tipo_producto_id,
       nombre,
@@ -118,12 +128,14 @@ exports.update = async (req, res, next) => {
       precio
     } = req.body;
 
-    const producto = await Producto.findByPk(id);
+    const producto = await Producto.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!producto) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 
@@ -149,14 +161,16 @@ exports.update = async (req, res, next) => {
 // Eliminar (inactivar) un producto
 exports.delete = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
 
-    const producto = await Producto.findByPk(id);
+    const producto = await Producto.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!producto) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 
@@ -177,15 +191,17 @@ exports.delete = async (req, res, next) => {
 // Activar/desactivar un producto
 exports.toggleActivo = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const { activo } = req.body;
 
-    const producto = await Producto.findByPk(id);
+    const producto = await Producto.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!producto) {
       return res.status(404).json({
         success: false,
-        message: 'Producto no encontrado'
+        message: 'Producto no encontrado en este restaurante'
       });
     }
 

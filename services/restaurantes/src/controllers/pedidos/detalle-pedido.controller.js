@@ -2,11 +2,14 @@ const { sequelize, DetallePedido, Pedido } = require('../../models');
 
 exports.getByPedido = async (req, res, next) => {
   try {
-    const { pedido_id } = req.params;
+    const { restaurante_id, pedido_id } = req.params;
 
-    const pedido = await Pedido.findByPk(pedido_id);
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id }
+    });
+
     if (!pedido)
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
 
     const detalles = await DetallePedido.findAll({
       where: { pedido_id },
@@ -21,7 +24,14 @@ exports.getByPedido = async (req, res, next) => {
 
 exports.getById = async (req, res, next) => {
   try {
-    const { pedido_id, id } = req.params;
+    const { restaurante_id, pedido_id, id } = req.params;
+
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id }
+    });
+
+    if (!pedido)
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
 
     const detalle = await DetallePedido.findOne({ where: { id, pedido_id } });
     if (!detalle)
@@ -36,7 +46,7 @@ exports.getById = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { pedido_id } = req.params;
+    const { restaurante_id, pedido_id } = req.params;
     const { producto_id, combo_id, cantidad, descuento } = req.body;
 
     if (!cantidad || cantidad <= 0) {
@@ -48,11 +58,16 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Debe indicar producto_id o combo_id' });
     }
 
-    const pedido = await Pedido.findByPk(pedido_id, { transaction: t });
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id },
+      transaction: t
+    });
+
     if (!pedido) {
       await t.rollback();
-      return res.status(404).json({ success: false, message: 'Pedido no encontrado' });
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
     }
+
     if ([6, 7].includes(pedido.estado_id)) {
       await t.rollback();
       return res.status(400).json({ success: false, message: 'No se pueden agregar ítems a un pedido entregado o cancelado' });
@@ -63,7 +78,7 @@ exports.create = async (req, res, next) => {
     if (producto_id) {
       const [rows] = await sequelize.query(
         'SELECT precio, activo, nombre FROM productos WHERE id = :id AND restaurante_id = :rid',
-        { replacements: { id: producto_id, rid: pedido.restaurante_id }, transaction: t }
+        { replacements: { id: producto_id, rid: restaurante_id }, transaction: t }
       );
       if (rows.length === 0) {
         await t.rollback();
@@ -77,7 +92,7 @@ exports.create = async (req, res, next) => {
     } else {
       const [rows] = await sequelize.query(
         'SELECT precio, activo, nombre FROM combos WHERE id = :id AND restaurante_id = :rid',
-        { replacements: { id: combo_id, rid: pedido.restaurante_id }, transaction: t }
+        { replacements: { id: combo_id, rid: restaurante_id }, transaction: t }
       );
       if (rows.length === 0) {
         await t.rollback();
@@ -117,12 +132,22 @@ exports.create = async (req, res, next) => {
 exports.update = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { pedido_id, id } = req.params;
+    const { restaurante_id, pedido_id, id } = req.params;
     const { cantidad, descuento } = req.body;
 
     if (!cantidad || cantidad <= 0) {
       await t.rollback();
       return res.status(400).json({ success: false, message: 'La cantidad debe ser mayor a 0' });
+    }
+
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id },
+      transaction: t
+    });
+
+    if (!pedido) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
     }
 
     const detalle = await DetallePedido.findOne({ where: { id, pedido_id }, transaction: t });
@@ -155,7 +180,17 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
-    const { pedido_id, id } = req.params;
+    const { restaurante_id, pedido_id, id } = req.params;
+
+    const pedido = await Pedido.findOne({
+      where: { id: pedido_id, restaurante_id },
+      transaction: t
+    });
+
+    if (!pedido) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
+    }
 
     const detalle = await DetallePedido.findOne({ where: { id, pedido_id }, transaction: t });
     if (!detalle) {
@@ -180,4 +215,3 @@ exports.delete = async (req, res, next) => {
     next(error);
   }
 };
-
