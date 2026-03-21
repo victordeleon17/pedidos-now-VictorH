@@ -34,6 +34,13 @@ const TipoCombo = require('./combos/tipo-combo.model');
 const Combo = require('./combos/combo.model');
 const ComboProducto = require('./combos/combo-producto.model');
 
+// Inventario
+const Inventario = require('./inventario/inventario.model');
+const HistorialInventario = require('./inventario/historial-inventario.model');
+const Proveedor = require('./inventario/proveedor.model');
+const EntradaInventario = require('./inventario/entrada-inventario.model');
+const DetalleEntradaInventario = require('./inventario/detalle-entrada-inventario.model');
+
 // Pedidos
 const EstadoPedido = require('./pedidos/estado-pedido.model');
 const Pedido = require('./pedidos/pedido.model');
@@ -97,6 +104,88 @@ Producto.hasMany(HistorialPreciosProducto, {
 HistorialPreciosProducto.belongsTo(Producto, { 
   foreignKey: 'producto_id', 
   as: 'producto' 
+});
+
+// ==================== MÓDULO: INVENTARIO ====================
+
+// Producto <-> Inventario (1:1)
+Producto.hasOne(Inventario, {
+  foreignKey: 'producto_id',
+  as: 'inventario'
+});
+Inventario.belongsTo(Producto, {
+  foreignKey: 'producto_id',
+  as: 'producto'
+});
+
+// Producto <-> HistorialInventario (1:N)
+Producto.hasMany(HistorialInventario, {
+  foreignKey: 'producto_id',
+  as: 'historial_inventario'
+});
+HistorialInventario.belongsTo(Producto, {
+  foreignKey: 'producto_id',
+  as: 'producto'
+});
+
+// Pedido <-> HistorialInventario (1:N)
+Pedido.hasMany(HistorialInventario, {
+  foreignKey: 'pedido_id',
+  as: 'movimientos_inventario'
+});
+HistorialInventario.belongsTo(Pedido, {
+  foreignKey: 'pedido_id',
+  as: 'pedido'
+});
+
+// DetalleEntradaInventario <-> HistorialInventario (1:N)
+DetalleEntradaInventario.hasMany(HistorialInventario, {
+  foreignKey: 'detalle_entrada_id',
+  as: 'movimientos_inventario'
+});
+HistorialInventario.belongsTo(DetalleEntradaInventario, {
+  foreignKey: 'detalle_entrada_id',
+  as: 'detalle_entrada'
+});
+
+// Restaurante <-> EntradaInventario (1:N)
+Restaurante.hasMany(EntradaInventario, {
+  foreignKey: 'restaurante_id',
+  as: 'entradas_inventario'
+});
+EntradaInventario.belongsTo(Restaurante, {
+  foreignKey: 'restaurante_id',
+  as: 'restaurante'
+});
+
+// Proveedor <-> EntradaInventario (1:N)
+Proveedor.hasMany(EntradaInventario, {
+  foreignKey: 'proveedor_id',
+  as: 'entradas'
+});
+EntradaInventario.belongsTo(Proveedor, {
+  foreignKey: 'proveedor_id',
+  as: 'proveedor'
+});
+
+// EntradaInventario <-> DetalleEntradaInventario (1:N)
+EntradaInventario.hasMany(DetalleEntradaInventario, {
+  foreignKey: 'entrada_id',
+  as: 'detalles'
+});
+DetalleEntradaInventario.belongsTo(EntradaInventario, {
+  foreignKey: 'entrada_id',
+  as: 'entrada'
+});
+
+// Producto <-> DetalleEntradaInventario (1:N)
+Producto.hasMany(DetalleEntradaInventario, {
+  foreignKey: 'producto_id',
+  as: 'detalles_entrada'
+});
+DetalleEntradaInventario.belongsTo(Producto, {
+  foreignKey: 'producto_id',
+  as: 'producto'
 });
 
 // ==================== MÓDULO: COMBOS ====================
@@ -217,16 +306,6 @@ HistorialEstadosPedido.belongsTo(Pedido, {
   as: 'pedido' 
 });
 
-// EstadoPedido <-> HistorialEstadosPedido (1:N)
-EstadoPedido.hasMany(HistorialEstadosPedido, { 
-  foreignKey: 'estado_id', 
-  as: 'historial' 
-});
-HistorialEstadosPedido.belongsTo(EstadoPedido, { 
-  foreignKey: 'estado_id', 
-  as: 'estado' 
-});
-
 // Pedido <-> CancelacionPedido (1:1)
 Pedido.hasOne(CancelacionPedido, { 
   foreignKey: 'pedido_id', 
@@ -253,6 +332,13 @@ module.exports = {
   TipoProducto,
   Producto,
   HistorialPreciosProducto,
+  
+  // Inventario
+  Inventario,
+  HistorialInventario,
+  Proveedor,
+  EntradaInventario,
+  DetalleEntradaInventario,
   
   // Combos
   TipoCombo,

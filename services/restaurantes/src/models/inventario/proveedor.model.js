@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../../config/database');
 
-const Restaurante = sequelize.define('Restaurante', {
+const Proveedor = sequelize.define('Proveedor', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -9,14 +9,6 @@ const Restaurante = sequelize.define('Restaurante', {
   },
   nombre: {
     type: DataTypes.STRING(150),
-    allowNull: false
-  },
-  descripcion: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  direccion: {
-    type: DataTypes.STRING(255),
     allowNull: false
   },
   telefono: {
@@ -27,13 +19,13 @@ const Restaurante = sequelize.define('Restaurante', {
     type: DataTypes.STRING(100),
     allowNull: true
   },
-  logo_url: {
+  direccion: {
     type: DataTypes.STRING(255),
     allowNull: true
   },
-  disponible: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false
+  notas: {
+    type: DataTypes.TEXT,
+    allowNull: true
   },
   activo: {
     type: DataTypes.BOOLEAN,
@@ -48,12 +40,11 @@ const Restaurante = sequelize.define('Restaurante', {
     allowNull: true
   }
 }, {
-  tableName: 'restaurantes',
+  tableName: 'proveedores',
   timestamps: false,
   indexes: [
-    { fields: ['activo'] },
-    { fields: ['disponible'] }
+    { fields: ['activo'] }
   ]
 });
 
-module.exports = Restaurante;
+module.exports = Proveedor;

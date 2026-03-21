@@ -17,26 +17,37 @@ const HistorialEstadosPedido = sequelize.define('HistorialEstadosPedido', {
   },
   estado_id: {
     type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'estados_pedido',
-      key: 'id'
-    }
+    allowNull: false
+  },
+  estado_nombre: {
+    type: DataTypes.STRING(80),
+    allowNull: false
+  },
+  motivo: {
+    type: DataTypes.TEXT,
+    allowNull: true
+  },
+  cancelado_por: {
+    type: DataTypes.STRING(50),
+    allowNull: true
+  },
+  aplica_multa: {
+    type: DataTypes.BOOLEAN,
+    allowNull: true
+  },
+  monto_multa: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: true
   },
   fecha_cambio: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
-  },
-  motivo: {
-    type: DataTypes.STRING(255),
-    allowNull: true
   }
 }, {
   tableName: 'historial_estados_pedido',
   timestamps: false,
   indexes: [
     { fields: ['pedido_id'] },
-    { fields: ['estado_id'] },
     { fields: ['fecha_cambio'] }
   ]
 });

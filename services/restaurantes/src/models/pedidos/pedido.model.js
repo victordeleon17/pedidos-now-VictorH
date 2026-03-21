@@ -58,7 +58,11 @@ const Pedido = sequelize.define('Pedido', {
     allowNull: true,
     comment: 'ID del cobro del servicio Cobros'
   },
-  fecha_pedido: {
+  activo: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true
+  },
+  fecha_creacion: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW
   },
@@ -73,7 +77,7 @@ const Pedido = sequelize.define('Pedido', {
     { fields: ['restaurante_id'] },
     { fields: ['cliente_id'] },
     { fields: ['estado_id'] },
-    { fields: ['fecha_pedido'] }
+    { fields: ['fecha_creacion'] }
   ]
 });
 

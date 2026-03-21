@@ -69,6 +69,15 @@ exports.getByRestaurante = async (req, res, next) => {
     const { restaurante_id } = req.params;
     const { activo } = req.query;
 
+    // Verificar que el restaurante existe
+    const restaurante = await Restaurante.findByPk(restaurante_id);
+    if (!restaurante) {
+      return res.status(404).json({
+        success: false,
+        message: 'Restaurante no encontrado'
+      });
+    }
+
     const where = { restaurante_id };
     if (activo !== undefined) where.activo = activo === 'true';
 
@@ -90,8 +99,8 @@ exports.getByRestaurante = async (req, res, next) => {
 // Crear un nuevo horario
 exports.create = async (req, res, next) => {
   try {
+    const { restaurante_id } = req.params;
     const {
-      restaurante_id,
       dia_semana,
       hora_apertura,
       hora_cierre
@@ -144,7 +153,7 @@ exports.create = async (req, res, next) => {
 // Actualizar un horario existente
 exports.update = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const {
       dia_semana,
       hora_apertura,
@@ -152,12 +161,14 @@ exports.update = async (req, res, next) => {
       activo
     } = req.body;
 
-    const horario = await HorarioRestaurante.findByPk(id);
+    const horario = await HorarioRestaurante.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!horario) {
       return res.status(404).json({
         success: false,
-        message: 'Horario no encontrado'
+        message: 'Horario no encontrado en este restaurante'
       });
     }
 
@@ -204,14 +215,16 @@ exports.update = async (req, res, next) => {
 // Eliminar (inactivar) un horario
 exports.delete = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
 
-    const horario = await HorarioRestaurante.findByPk(id);
+    const horario = await HorarioRestaurante.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!horario) {
       return res.status(404).json({
         success: false,
-        message: 'Horario no encontrado'
+        message: 'Horario no encontrado en este restaurante'
       });
     }
 
@@ -231,15 +244,17 @@ exports.delete = async (req, res, next) => {
 // Activar/Desactivar un horario
 exports.toggleActivo = async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const { restaurante_id, id } = req.params;
     const { activo } = req.body;
 
-    const horario = await HorarioRestaurante.findByPk(id);
+    const horario = await HorarioRestaurante.findOne({
+      where: { id, restaurante_id }
+    });
 
     if (!horario) {
       return res.status(404).json({
         success: false,
-        message: 'Horario no encontrado'
+        message: 'Horario no encontrado en este restaurante'
       });
     }
 
