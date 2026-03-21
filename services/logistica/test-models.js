@@ -7,7 +7,9 @@ require('dotenv').config();
 const { 
     sequelize, 
     testConnection, 
-    syncDatabase 
+    syncDatabase,
+    createDatabaseIfNotExists,
+    initDatabase
 } = require('./db/db');
 
 const {
@@ -25,16 +27,24 @@ async function testModels() {
     console.log('╚═══════════════════════════════════════════════════════════╝\n');
 
     try {
-        // 1. Probar conexión
-        console.log('🔌 Paso 1: Probando conexión a la base de datos...');
+        // 1. Crear base de datos si no existe
+        console.log('🔧 Paso 1: Verificando/Creando base de datos...');
+        const dbCreated = await createDatabaseIfNotExists();
+        if (!dbCreated) {
+            throw new Error('No se pudo crear la base de datos');
+        }
+        console.log('');
+
+        // 2. Probar conexión
+        console.log('🔌 Paso 2: Probando conexión a la base de datos...');
         const connected = await testConnection();
         if (!connected) {
             throw new Error('No se pudo conectar a la base de datos');
         }
         console.log('');
 
-        // 2. Verificar modelos cargados
-        console.log('📦 Paso 2: Verificando modelos cargados...');
+        // 3. Verificar modelos cargados
+        console.log('📦 Paso 3: Verificando modelos cargados...');
         const modelos = [
             'Repartidor',
             'EstadoOperativoRepartidor',
@@ -54,8 +64,8 @@ async function testModels() {
         });
         console.log('');
 
-        // 3. Verificar relaciones
-        console.log('🔗 Paso 3: Verificando relaciones entre modelos...');
+        // 4. Verificar relaciones
+        console.log('🔗 Paso 4: Verificando relaciones entre modelos...');
         
         console.log('   Repartidor:');
         console.log(`      → entregas: ${Repartidor.associations.entregas ? '✅' : '❌'}`);
@@ -70,8 +80,8 @@ async function testModels() {
         
         console.log('');
 
-        // 4. Sincronizar modelos (sin force para no borrar datos)
-        console.log('🔄 Paso 4: Sincronizando modelos con la base de datos...');
+        // 5. Sincronizar modelos (sin force para no borrar datos)
+        console.log('🔄 Paso 5: Sincronizando modelos con la base de datos...');
         console.log('   ⚠️  Usando { alter: true } para ajustar tablas existentes');
         
         const synced = await syncDatabase({ alter: true });
@@ -81,16 +91,17 @@ async function testModels() {
         }
         console.log('');
 
-        // 5. Resumen
+        // 6. Resumen
         console.log('╔═══════════════════════════════════════════════════════════╗');
         console.log('║                    ✅ PRUEBA EXITOSA                      ║');
         console.log('╠═══════════════════════════════════════════════════════════╣');
+        console.log('║  • Base de datos creada/verificada                       ║');
         console.log('║  • 6 modelos cargados correctamente                      ║');
         console.log('║  • Relaciones configuradas                               ║');
         console.log('║  • Tablas sincronizadas con la base de datos             ║');
         console.log('╚═══════════════════════════════════════════════════════════╝\n');
 
-        // 6. Mostrar información adicional
+        // 7. Mostrar información adicional
         console.log('📊 INFORMACIÓN DE MODELOS:\n');
         console.log('Tabla                           PK                    Timestamps');
         console.log('────────────────────────────────────────────────────────────────');

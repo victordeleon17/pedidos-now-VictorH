@@ -38,17 +38,6 @@ EstadoOperativoRepartidor.belongsTo(Repartidor, {
 
 // ==================== MÓDULO: ENTREGAS ====================
 
-// Repartidor <-> Entrega (1:N)
-// Un repartidor puede tener múltiples entregas asignadas
-Repartidor.hasMany(Entrega, { 
-    foreignKey: 'repartidor_id', 
-    as: 'entregas' 
-});
-Entrega.belongsTo(Repartidor, { 
-    foreignKey: 'repartidor_id', 
-    as: 'repartidor' 
-});
-
 // Entrega <-> HistorialEstadoEntrega (1:N)
 // Una entrega tiene múltiples registros de cambios de estado
 Entrega.hasMany(HistorialEstadoEntrega, { 

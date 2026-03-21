@@ -8,25 +8,23 @@ const AsignacionEntrega = sequelize.define('AsignacionEntrega', {
         autoIncrement: true
     },
     entrega_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         references: {
             model: 'entregas',
             key: 'id_entrega'
         },
+        onDelete: 'RESTRICT',
+        onUpdate: 'CASCADE',
         comment: 'ID de la entrega'
     },
     repartidor_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
-        references: {
-            model: 'repartidores',
-            key: 'id_repartidor'
-        },
         comment: 'ID del repartidor asignado'
     },
     asignado_por_usuario_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         comment: 'ID del usuario que realizó la asignación'
     },
@@ -48,9 +46,10 @@ const AsignacionEntrega = sequelize.define('AsignacionEntrega', {
     createdAt: 'created_at',
     updatedAt: false,
     indexes: [
-        { fields: ['entrega_id'], name: 'idx_asignaciones_entrega_id' },
-        { fields: ['repartidor_id'], name: 'idx_asignaciones_repartidor_id' },
-        { fields: ['activa'], name: 'idx_asignaciones_activa' }
+        { fields: ['entrega_id'], name: 'idx_asig_entrega' },
+        { fields: ['repartidor_id'], name: 'idx_asig_repartidor' },
+        { fields: ['activa'], name: 'idx_asig_activa' },
+        { fields: ['fecha_asignacion'], name: 'idx_asig_fecha' }
     ],
     comment: 'Historial de asignaciones de repartidores a entregas (permite reasignaciones)'
 });

@@ -3,58 +3,53 @@ const sequelize = require('../../../db/db');
 
 const Entrega = sequelize.define('Entrega', {
     id_entrega: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         primaryKey: true,
         autoIncrement: true
     },
     tipo_origen: {
-        type: DataTypes.ENUM('restaurante', 'negocio'),
+        type: DataTypes.ENUM('pedido', 'cotizacion', 'manual'),
         allowNull: false,
-        comment: 'Módulo origen de la entrega'
+        comment: 'Tipo de origen de la entrega'
     },
     origen_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         comment: 'ID del pedido/orden en el módulo origen'
     },
     empresa_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         comment: 'ID del restaurante o negocio'
     },
     sucursal_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: true,
         comment: 'ID de la sucursal (si aplica)'
     },
     cliente_id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         allowNull: false,
         comment: 'ID del cliente que recibirá la entrega'
-    },
-    repartidor_id: {
-        type: DataTypes.BIGINT,
-        allowNull: true,
-        references: {
-            model: 'repartidores',
-            key: 'id_repartidor'
-        },
-        comment: 'ID del repartidor asignado (desde Administración)'
     },
     estado_entrega: {
         type: DataTypes.ENUM(
             'pendiente',
             'asignada',
-            'en_preparacion',
-            'lista_para_recoger',
-            'en_camino',
+            'en_ruta',
             'entregada',
-            'cancelada',
-            'fallida'
+            'fallida',
+            'cancelada'
         ),
         allowNull: false,
         defaultValue: 'pendiente',
         comment: 'Estado actual de la entrega'
+    },
+    activa: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+        comment: 'Indica si la entrega está activa'
     },
     direccion_entrega: {
         type: DataTypes.TEXT,
@@ -93,16 +88,13 @@ const Entrega = sequelize.define('Entrega', {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     indexes: [
-        { 
-            unique: true, 
-            fields: ['tipo_origen', 'origen_id'],
-            name: 'uq_entrega_origen'
-        },
-        { fields: ['empresa_id'], name: 'idx_entregas_empresa_id' },
-        { fields: ['sucursal_id'], name: 'idx_entregas_sucursal_id' },
-        { fields: ['cliente_id'], name: 'idx_entregas_cliente_id' },
-        { fields: ['repartidor_id'], name: 'idx_entregas_repartidor_id' },
-        { fields: ['estado_entrega'], name: 'idx_entregas_estado_entrega' }
+        { fields: ['empresa_id'], name: 'idx_entregas_empresa' },
+        { fields: ['sucursal_id'], name: 'idx_entregas_sucursal' },
+        { fields: ['cliente_id'], name: 'idx_entregas_cliente' },
+        { fields: ['estado_entrega'], name: 'idx_entregas_estado' },
+        { fields: ['activa'], name: 'idx_entregas_activa' },
+        { fields: ['tipo_origen', 'origen_id'], name: 'idx_entregas_origen' },
+        { fields: ['fecha_entrega_estimada'], name: 'idx_entregas_fecha_est' }
     ],
     comment: 'Tabla principal de entregas gestionadas por el módulo de Logística'
 });
