@@ -1,2 +1,5 @@
-// Exportar controladores de entregas
-module.exports = {};
+const entregaController = require('./entrega.controller');
+
+module.exports = {
+    ...entregaController
+};

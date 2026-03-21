@@ -1,2 +1,5 @@
-// Exportar controladores de asignaciones
-module.exports = {};
+const asignacionController = require('./asignacion.controller');
+
+module.exports = {
+    ...asignacionController
+};

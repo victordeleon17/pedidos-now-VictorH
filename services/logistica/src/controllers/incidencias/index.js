@@ -1,2 +1,5 @@
-// Exportar controladores de incidencias
-module.exports = {};
+const incidenciaController = require('./incidencia.controller');
+
+module.exports = {
+    ...incidenciaController
+};
