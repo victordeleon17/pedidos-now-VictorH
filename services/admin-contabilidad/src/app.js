@@ -11,9 +11,9 @@ const compesacionRoutes = require('./routes/compensacion.routes');
 const app = express();
 app.use(express.json());
 
+app.use('/', testRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/pagos-agentes', pagosAgentesRoutes);
-app.use('/api/reportes', reportesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/movimientos', movimientoRoutes);
 app.use('/api/reembolsos', reembolsoRoutes);
@@ -36,3 +36,5 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en puerto ${PORT}`);
 });
+
+console.log(process.env.DB_USER);

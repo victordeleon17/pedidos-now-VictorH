@@ -1,5 +1,6 @@
 const repo = require('../repositories/compensacion.repository');
 const movRepo = require('../repositories/movimiento.repository');
+const auditoriaRepo = require('../repositories/auditoria.repository');
 
 const registrarCompensacion = async (data) => {
     const cuenta_id = 1;
@@ -18,6 +19,13 @@ const registrarCompensacion = async (data) => {
 
     //restar saldo
     await movRepo.restarSaldo(cuenta_id, data.monto);
+
+    //auditoria
+    await auditoriaRepo.registrarLog(null, {
+        accion: 'COMPENSACION',
+        descripcion: `Compensación a entidad ${data.entidad_id}`,
+        monto: data.monto
+    });
 
     return {
         ok: true,
