@@ -4,14 +4,8 @@ module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: process.env.PORT || 3000,
 
-  DATABASE_URL: process.env.DATABASE_URL || null,
-  
-  // Database - Compatible con Railway (MYSQL*) y local (DB_*)
-  DB_HOST: process.env.MYSQLHOST || process.env.DB_HOST || 'localhost',
-  DB_PORT: process.env.MYSQLPORT || process.env.DB_PORT || 3306,
-  DB_NAME: process.env.MYSQLDATABASE || process.env.DB_NAME || 'restaurantes_db',
-  DB_USER: process.env.MYSQLUSER || process.env.DB_USER || 'root',
-  DB_PASSWORD: process.env.MYSQLPASSWORD || process.env.DB_PASSWORD || '',
+  // Database - PostgreSQL (Railway provee DATABASE_URL automáticamente)
+  DATABASE_URL: process.env.DATABASE_URL || 'postgresql://root:lufi2110@localhost:5432/modulo_restaurantes',
   
   // JWT
   JWT_SECRET: process.env.JWT_SECRET || 'default_secret',
