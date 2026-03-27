@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 8080
 
-CMD ["node", "syncDatabase.js"]
+CMD ["node", "server.js"]
