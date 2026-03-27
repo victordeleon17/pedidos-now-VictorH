@@ -7,11 +7,10 @@ const startServer = async () => {
     // Probar conexión a la BD
     await testConnection();
     
-    // Sincronizar modelos según el ambiente
+    // Sincronizar modelos solo en desarrollo o primera vez
     if (env.NODE_ENV === 'production') {
-      // En producción: solo crea tablas que no existan
-      await sequelize.sync({ alter: false });
-      console.log('📦 Modelos sincronizados (producción: solo creación).');
+      // En producción: solo verificar conexión, no sincronizar
+      console.log('📦 Modo producción: Base de datos lista (sin sincronización automática).');
     } else {
       // En desarrollo: permite modificar estructura
       await sequelize.sync({ alter: true });
