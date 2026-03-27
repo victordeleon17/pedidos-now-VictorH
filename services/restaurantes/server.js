@@ -20,8 +20,8 @@ const startServer = async () => {
     
     // Iniciar servidor
     const PORT = env.PORT;
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Servidor corriendo en 0.0.0.0:${PORT}`);
       console.log(`🌍 Ambiente: ${env.NODE_ENV}`);
     });
   } catch (error) {
