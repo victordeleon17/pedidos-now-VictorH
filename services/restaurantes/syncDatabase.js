@@ -1,20 +1,26 @@
 const { sequelize, testConnection } = require('./src/config/database');
+const env = require('./src/config/env');
 // Importar todos los modelos para que Sequelize los registre
 require('./src/models');
 
 const syncDatabase = async () => {
   try {
     console.log('🔄 Iniciando sincronización de base de datos...');
+    console.log(`🌍 Ambiente: ${env.NODE_ENV}`);
     
     // Probar conexión
     await testConnection();
     
-    // Sincronizar con force: true (elimina y recrea las tablas)
-    // ADVERTENCIA: Esto eliminará todos los datos existentes
-    await sequelize.sync({ force: true });
-    
-    console.log('✅ Base de datos sincronizada exitosamente.');
-    console.log('⚠️  Todas las tablas han sido recreadas.');
+    // Sincronizar según el ambiente
+    if (env.NODE_ENV === 'production') {
+      // En producción: solo crea tablas nuevas, no modifica existentes
+      await sequelize.sync({ alter: false });
+      console.log('✅ Base de datos sincronizada (modo producción: solo creación).');
+    } else {
+      // En desarrollo: permite modificar estructura
+      await sequelize.sync({ alter: true });
+      console.log('✅ Base de datos sincronizada (modo desarrollo: con alter).');
+    }
     
     process.exit(0);
   } catch (error) {
