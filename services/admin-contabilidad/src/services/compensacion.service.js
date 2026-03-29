@@ -1,3 +1,4 @@
+const db = require('../config/db');
 const repo = require('../repositories/compensacion.repository');
 const movRepo = require('../repositories/movimiento.repository');
 const auditoriaRepo = require('../repositories/auditoria.repository');
@@ -6,6 +7,13 @@ const registrarCompensacion = async (data) => {
     const cuenta_id = 1;
 
     //guarda compensación
+    const [rows] = await db.query(
+        'SELECT id FROM entidad_comercial WHERE id = ?',
+        [data.entidad_id]
+    );
+    if (rows.length === 0) {
+        throw new Error('Entidad comercial no existe');
+    }
     const compensacionId = await repo.crearCompensacion(data);
 
     //registrar egreso financiero

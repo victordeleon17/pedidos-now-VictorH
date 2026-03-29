@@ -24,7 +24,7 @@ const registrarReembolso = async (data) => {
         }
 
         //guarda reembolso
-        const reembolsoId = await repo.crearReembolso(conn, data);
+        const reembolsoId = await repo.crearReembolsoConn(conn, data);
 
         //registrar egreso financiero
         const movimientoId = await movRepo.crearEgresoConn(conn, {

@@ -5,7 +5,10 @@ const getAllPagosAgentes = async (req, res) => {
         const pagos = await pagosService.getAll();
         res.json(pagos);
     } catch (error) {
-        console.error("ERROR REAL:", error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({ error: 'Error interno'});
     }
 };
@@ -15,7 +18,10 @@ const getTotalPagos = async (req, res) => {
         const total = await pagosService.obtenerTotalPagos();
         res.json(total);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error: 'Error al obtener total de pagos'});
     }
 };
@@ -32,7 +38,10 @@ const crearPagoAgente = async (req, res) => {
         const result = await pagosService.pagarAgente(data);
         res.json(result);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error:'Error al pagar agente'});
     }
 };

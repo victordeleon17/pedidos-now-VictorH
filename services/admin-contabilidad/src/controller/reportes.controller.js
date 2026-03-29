@@ -8,7 +8,10 @@ const getPagosPorFecha = async (req, res) => {
 
         res.json(data);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({ error: 'Error al obtener reporte' });
     }
 } 
@@ -21,7 +24,10 @@ const getVentas = async (req, res) => {
             total_ventas: Number(data.total_ventas)
         });
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error: 'Error en ventas'});
     }
 };
@@ -33,7 +39,10 @@ const getPedidos = async (req, res) => {
         res.json(data);
         console.log("inicio:", inicio, "fin", fin);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });       
         res.status(500).json({error: 'Error en pedidos'});
     }
 };
@@ -46,7 +55,10 @@ const getPropinas = async (req, res) => {
             total_propinas: Number(data.total_propinas)
         });
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error:'Error en propinas'});
     }
 };
@@ -59,7 +71,10 @@ const getCostos = async (req, res) => {
             total_costos: Number(data.total_costos)
         });
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error: 'Error en costos'});
     }
 };
@@ -70,7 +85,10 @@ const getCrecimiento = async (req, res) => {
         const data = await reportesService.getCrecimiento();
         res.json(data);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error: 'Error en crecimiento'})
     }
 };
@@ -80,7 +98,10 @@ const getChats = async (req, res) => {
         const data = await reportesService.getChats();
         res.json(data);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });
         res.status(500).json({error:'Error en chats'});
     }
 };

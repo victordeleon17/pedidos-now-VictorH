@@ -14,7 +14,10 @@ const ingresoPedido = async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error:'Error al registrar ingreso'});
     }
 };
@@ -27,7 +30,10 @@ const egreso = async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error: 'Error al registrar egreso'});
     }
 };
@@ -37,7 +43,10 @@ const getFondos = async (req, res) => {
         const fondos = await service.obtenerFondos();
         res.json(fondos);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error:'Error obteniendo fondos'});
     }
 };
@@ -48,7 +57,10 @@ const getFondoReembolsos = async (req, res) => {
         const fondo = fondos.find(f => f.id === 2);
         res.json(fondo);
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });
         res.status(500).json({error: 'Error obtenido fondo'});
     }
 };
@@ -65,11 +77,16 @@ const recargarFondo = async (req, res) => {
         await service.registrarIngresoPedido({
             pedido_id: 0,
             monto,
+            subtipo: 'fondo',
+            modulo_origen: 'reembolso',
             descripcion: 'Recarga fondo reembolsos'
         });
         res.json({ok: true, mensaje: 'Fondo recargado'});
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error: 'Error recargando fondo'});
     }
 };
