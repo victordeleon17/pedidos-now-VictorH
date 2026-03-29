@@ -8,7 +8,7 @@ const crearReembolso = async (req, res) => {
 
         res.json(result);
     } catch(error) {
-        console.error(error);
+        console.error("Error Reembolso", error);       
         res.status(500).json({error:'Error al procesar reembolso'});
     }
 };

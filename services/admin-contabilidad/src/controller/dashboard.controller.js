@@ -22,7 +22,10 @@ const getDashboard = async (req, res) => {
             ganancia: totalVentas - totalCostos
         });
     } catch (error) {
-        console.error(error);
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
         res.status(500).json({error:'Error en dashboard'});
     }
 };

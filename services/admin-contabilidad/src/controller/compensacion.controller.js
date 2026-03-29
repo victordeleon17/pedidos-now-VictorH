@@ -14,8 +14,15 @@ const crearCompensacion = async (req, res) => {
 
         res.json(result);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({error: 'Error al procesar compensacion'});
+        console.error({
+            mensaje: error.message,
+            stack: error.stack
+        });        
+        res.status(500).json({
+            ok: false,
+            mensaje: 'Error al procesar compensación',
+            detalle: error.message
+        });
     }
 };
 
