@@ -42,8 +42,42 @@ const getFondos = async (req, res) => {
     }
 };
 
+const getFondoReembolsos = async (req, res) => {
+    try {
+        const fondos = await service.obtenerFondos();
+        const fondo = fondos.find(f => f.id === 2);
+        res.json(fondo);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: 'Error obtenido fondo'});
+    }
+};
+
+const recargarFondo = async (req, res) => {
+    try {
+        const {monto} = req.body;
+        if (!monto || monto <= 0){
+            return res.status(400).json({
+                error:'Monto inválido'
+            });
+        }
+        const cuenta_id = 2;
+        await service.registrarIngresoPedido({
+            pedido_id: 0,
+            monto,
+            descripcion: 'Recarga fondo reembolsos'
+        });
+        res.json({ok: true, mensaje: 'Fondo recargado'});
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: 'Error recargando fondo'});
+    }
+};
+
 module.exports = {
     ingresoPedido,
     egreso,
-    getFondos
+    getFondos,
+    getFondoReembolsos,
+    recargarFondo
 }
