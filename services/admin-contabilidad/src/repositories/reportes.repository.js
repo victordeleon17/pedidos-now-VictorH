@@ -108,20 +108,53 @@ const getCrecimientoVentas = async () => {
     return rows[0];
 }
 
-const getChats = async () => {
-    return [
-        {estado: 'resuelto', total: 45},
-        {estado: 'no_resuelto', total: 10},
-        {estado: 'cerrado', total: 5}
-    ]
-}
+//const getChats = async () => {
+//    return [
+//        {estado: 'resuelto', total: 45},
+//        {estado: 'no_resuelto', total: 10},
+//        {estado: 'cerrado', total: 5}
+//    ]
+//}
 
-const getUsuariosMes = async () => {
-    return [
-        {mes: 'Enero', total: 120},
-        {mes: 'Febrero', total: 200},
-        {mes: 'Marzo', total: 150}
-    ];
+//const getUsuariosMes = async () => {
+//    return [
+//        {mes: 'Enero', total: 120},
+//        {mes: 'Febrero', total: 200},
+//        {mes: 'Marzo', total: 150}
+//    ];
+//};
+
+const getEstadisticasPorEntidad = async (inicio, fin) => {
+    const [rows] = await db.query(
+        `SELECT ec.id, ec.nombre_comercial,
+        COUNT(DISTINCT pc.id) AS total_pedidos,
+        IFNULL(SUM(pc.descuento),0) AS total_descuentos
+        FROM entidad_comercial ec
+        LEFT JOIN pedido_contabilidad pc
+        ON ec.id = pc.entidad_comercial_id
+        WHERE (? IS NULL OR DATE(pc.fecha) BETWEEN ? AND ?)
+        GROUP BY ec.id, ec.nombre_comercial`,
+        [inicio, inicio, fin]       
+    );
+    return rows;
+};
+
+const getReembolsosYCompensaciones = async (inicio, fin) => {
+    const [rows] = await db.query(
+        `SELECT 'reembolso' as tipo,
+        COUNT(*) as total,
+        IFNULL(SUM(monto),0) as monto_total
+        FROM reembolso_cliente
+        WHERE (? IS NULL OR DATE(fecha_solicitud) BETWEEN ? AND ?)
+        UNION ALL
+        SELECT 'compensacion' as tipo,
+        COUNT(*) as total,
+        IFNULL(SUM(monto),0) as monto_total
+        FROM compensacion_entidad
+        WHERE (? IS NULL OR DATE(fecha_generacion) BETWEEN ? AND ?)`,
+        [inicio, inicio, fin, inicio, inicio, fin]
+    );
+    return rows;
 };
 
 module.exports = {
@@ -132,6 +165,6 @@ module.exports = {
     getCostos,
     getVentasPorDia,
     getCrecimientoVentas,
-    getChats,
-    getUsuariosMes
+    getEstadisticasPorEntidad,
+    getReembolsosYCompensaciones
 };

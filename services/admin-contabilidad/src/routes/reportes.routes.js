@@ -13,5 +13,7 @@ router.get('/crecimiento', controller.getCrecimiento);
 router.get('/chats', controller.getChats);
 router.get('/usuarios', controller.getUsuarios);
 router.get('/pedidos-externos', controller.getPedidosExternos);
+router.get('/estadisticas-entidad', controller.getEstadisticasPorEntidad);
+router.get('/reembolsos-compensaciones', controller.getReembolsosYCompensaciones);
 
 module.exports = router;

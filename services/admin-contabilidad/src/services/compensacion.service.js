@@ -6,6 +6,15 @@ const auditoriaRepo = require('../repositories/auditoria.repository');
 const registrarCompensacion = async (data) => {
     const cuenta_id = 1;
 
+    const [saldo] = await db.query(
+        `SELECT saldo FROM cuenta_fondo WHERE id = ?`,
+        [cuenta_id]
+    );
+
+    if (saldo[0].saldo < data.monto) {
+        throw new Error('Fondos insuficientes');
+    }
+
     //guarda compensación
     const [rows] = await db.query(
         'SELECT id FROM entidad_comercial WHERE id = ?',
