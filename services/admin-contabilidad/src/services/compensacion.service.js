@@ -21,7 +21,7 @@ const registrarCompensacion = async (data) => {
     await movRepo.restarSaldo(cuenta_id, data.monto);
 
     //auditoria
-    await auditoriaRepo.registrarLog(null, {
+    await auditoriaRepo.registrarLog({
         accion: 'COMPENSACION',
         descripcion: `Compensación a entidad ${data.entidad_id}`,
         monto: data.monto

@@ -4,6 +4,7 @@ const controller = require('../controller/movimiento.controller');
 
 router.post('/ingreso-pedido', controller.ingresoPedido);
 router.post('/egreso', controller.egreso);
+router.get('/fondos', controller.getFondos);
 
 router.get('/test', (req, res) => {
     res.send('Movimiento OK');

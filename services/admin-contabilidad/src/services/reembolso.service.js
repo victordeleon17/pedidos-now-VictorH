@@ -27,7 +27,7 @@ const registrarReembolso = async (data) => {
         const reembolsoId = await repo.crearReembolso(conn, data);
 
         //registrar egreso financiero
-        const movimientoId = await movRepo.crearEgreso(conn, {
+        const movimientoId = await movRepo.crearEgresoConn(conn, {
             cuenta_id,
             subtipo: 'reembolso',
             referencia_id: data.pedido_id,
@@ -36,7 +36,7 @@ const registrarReembolso = async (data) => {
         });
 
         await conn.query(
-            'UPDATE cuenta_fondo SET saldo - ? WHERE id = ?',
+            'UPDATE cuenta_fondo SET saldo = saldo - ? WHERE id = ?',
             [data.monto, cuenta_id]
         );
 

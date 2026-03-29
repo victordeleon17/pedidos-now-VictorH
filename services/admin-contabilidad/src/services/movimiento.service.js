@@ -36,7 +36,12 @@ const registrarEgreso = async (data) => {
     };
 };
 
+const obtenerFondos = async () => {
+    return await repo.getFondos();
+};
+
 module.exports = {
     registrarIngresoPedido,
-    registrarEgreso
+    registrarEgreso,
+    obtenerFondos
 }

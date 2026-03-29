@@ -4,7 +4,7 @@ const ingresoPedido = async (req, res) => {
     try {
         const data = req.body;
 
-        if (!data || !data.pedido_id || !data.monto || !data.monto <= 0) {
+        if (!data || !data.pedido_id || !data.monto || data.monto <= 0) {
             return res.status(400).json({
                 error: 'Faltan datos o monto inválido'
             });
@@ -32,7 +32,18 @@ const egreso = async (req, res) => {
     }
 };
 
+const getFondos = async (req, res) => {
+    try {
+        const fondos = await service.obtenerFondos();
+        res.json(fondos);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error:'Error obteniendo fondos'});
+    }
+};
+
 module.exports = {
     ingresoPedido,
-    egreso
+    egreso,
+    getFondos
 }

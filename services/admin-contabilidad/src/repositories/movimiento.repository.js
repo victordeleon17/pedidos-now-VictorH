@@ -25,10 +25,10 @@ const actualizarSaldo = async (cuenta_id, monto) => {
 const crearEgreso = async (data) => {
     const [result] = await db.query(
         `INSERT INTO movimiento_financiero
-        (cuenta_id, tipo, subtipo, modulo_origen
-        referencia_id, monto, descripcion, estado
-        VALUES (?, 'egreso', ?, 'admin',
-        ?, ?, ?, 'procesado'))`,
+        (cuenta_id, tipo, subtipo, modulo_origen,
+        referencia_id, monto, descripcion, estado)
+        VALUES (?, 'egreso', ?, 'reembolso',
+        ?, ?, ?, 'procesado')`,
         [
             data.cuenta_id,
             data.subtipo,
@@ -67,10 +67,18 @@ const restarSaldo = async (cuenta_id, monto) => {
     );
 };
 
+const getFondos = async () => {
+    const [rows] = await db.query(
+        'SELECT id, saldo FROM cuenta_fondo'
+    ); 
+    return rows;
+};
+
 module.exports = {
     crearMovimiento,
     actualizarSaldo,
     crearEgreso,
     crearEgresoConn, 
-    restarSaldo
+    restarSaldo,
+    getFondos
 }

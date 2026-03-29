@@ -20,7 +20,25 @@ const getTotalPagos = async (req, res) => {
     }
 };
 
+const crearPagoAgente = async (req, res) => {
+    try {
+        const data = req.body;
+
+        if(!data.agente_id || !data.salario || data.salario <= 0) {
+            return res.status(400).json({
+                error: 'Datos inválidos'
+            });
+        }
+        const result = await pagosService.pagarAgente(data);
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error:'Error al pagar agente'});
+    }
+};
+
 module.exports = {
     getAllPagosAgentes,
-    getTotalPagos
+    getTotalPagos,
+    crearPagoAgente
 };
