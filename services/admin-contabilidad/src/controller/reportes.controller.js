@@ -120,6 +120,32 @@ const getPedidosExternos = async (req, res) => {
     res.json(data);
 };
 
+const getEstadisticasPorEntidad = async (req, res) => {
+    try {
+        const {inicio, fin} = req.query;
+        const data = await reportesService.getEstadisticasPorEntidad(inicio, fin);
+        const resultado = data.map(item => ({
+            id: item.id,
+            nombre_comercial: item.nombre_comercial,
+            total_pedidos: Number(item.total_pedidos),
+            total_descuentos: Number(item.total_descuentos)
+        }));
+        res.json(resultado);
+    } catch (error) {
+        res.status(500).json({error: 'Error en estadísticas por entidad'});
+    }
+};
+
+const getReembolsosYCompensaciones = async (req, res) => {
+    try {
+        const {inicio, fin} = req.query;
+        const data = await reportesService.getReembolsosYCompensaciones(inicio, fin);
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({error: 'Error en reembolsos/compensaciones'});
+    }
+}
+
 module.exports = {
     getPagosPorFecha,
     getVentas,
@@ -129,5 +155,7 @@ module.exports = {
     getCrecimiento,
     getChats,
     getUsuarios,
-    getPedidosExternos
+    getPedidosExternos,
+    getReembolsosYCompensaciones,
+    getEstadisticasPorEntidad
 };

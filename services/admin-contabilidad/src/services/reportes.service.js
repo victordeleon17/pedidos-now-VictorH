@@ -38,12 +38,28 @@ const getCrecimiento = async() => {
 };
 
 const getChats = async () => {
-    return await reportesRepo.getChats();
-}
+    try {
+        const response = await axios.get('http://localhost:5000/chats');
+        return response.data;
+    } catch (error) {
+        return {
+            mensaje: 'Servicio de chats no disponible',
+            fallback: true
+        };
+    }
+};
 
 const getUsuarios = async () => {
-    return await reportesRepo.getUsuariosMes();
-}
+    try {
+        const response = await axios.get('http://localhost:5001/usuarios');
+        return response.data;
+    } catch (error) {
+        return {
+            mensaje: 'Servicio de usuarios no disponible',
+            fallback: true
+        };
+    }
+};
 
 const axios = require('axios');
 
@@ -59,6 +75,14 @@ const getPedidosExternos = async () => {
     }
 };
 
+const getEstadisticasPorEntidad = (inicio, fin) => {
+    return reportesRepo.getEstadisticasPorEntidad(inicio, fin);
+};
+
+const getReembolsosYCompensaciones = (inicio, fin) => {
+    return reportesRepo.getReembolsosYCompensaciones(inicio, fin);
+};
+
 module.exports = {
     getPagosPorFecha,
     getVentas,
@@ -68,5 +92,7 @@ module.exports = {
     getCrecimiento,
     getChats,
     getUsuarios,
-    getPedidosExternos
+    getPedidosExternos,
+    getEstadisticasPorEntidad,
+    getReembolsosYCompensaciones
 };
