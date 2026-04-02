@@ -10,9 +10,11 @@ const sequelize = require('../../db/db');
 // IMPORTAR TODOS LOS MODELOS
 // ============================================================
 
-// Modelos de Repartidores (desde Administración)
+// Modelos de Categorías
+const CategoriaOrden = require('./categorias/categoria-orden.model');
+
+// Modelos de Repartidores
 const Repartidor = require('./repartidores/repartidor.model');
-const EstadoOperativoRepartidor = require('./repartidores/estado-operativo-repartidor.model');
 
 // Modelos de Logística
 const Entrega = require('./entregas/entrega.model');
@@ -20,26 +22,34 @@ const AsignacionEntrega = require('./asignaciones/asignacion-entrega.model');
 const HistorialEstadoEntrega = require('./historial/historial-estado.model');
 const IncidenciaEntrega = require('./incidencias/incidencia.model');
 
+// Modelos de Ubicaciones
+const HistorialUbicacionRepartidor = require('./ubicaciones/historial-ubicacion-repartidor.model');
+
+// Modelos de Notificaciones
+const NotificacionLogistica = require('./notificaciones/notificacion-logistica.model');
+
+// Modelos de Calificaciones
+const CalificacionEntrega = require('./calificaciones/calificacion-entrega.model');
+
 // ============================================================
 // DEFINIR RELACIONES (ASSOCIATIONS)
 // ============================================================
 
-// ==================== MÓDULO: REPARTIDORES ====================
+// ==================== MÓDULO: CATEGORÍAS ====================
 
-// Repartidor <-> EstadoOperativoRepartidor (1:1)
-Repartidor.hasOne(EstadoOperativoRepartidor, { 
-    foreignKey: 'repartidor_id', 
-    as: 'estado_operativo' 
+// Entrega <-> CategoriaOrden (N:1)
+Entrega.belongsTo(CategoriaOrden, { 
+    foreignKey: 'categoria_id', 
+    as: 'categoria' 
 });
-EstadoOperativoRepartidor.belongsTo(Repartidor, { 
-    foreignKey: 'repartidor_id', 
-    as: 'repartidor' 
+CategoriaOrden.hasMany(Entrega, { 
+    foreignKey: 'categoria_id', 
+    as: 'entregas' 
 });
 
 // ==================== MÓDULO: ENTREGAS ====================
 
 // Entrega <-> HistorialEstadoEntrega (1:N)
-// Una entrega tiene múltiples registros de cambios de estado
 Entrega.hasMany(HistorialEstadoEntrega, { 
     foreignKey: 'entrega_id', 
     as: 'historial' 
@@ -52,7 +62,6 @@ HistorialEstadoEntrega.belongsTo(Entrega, {
 // ==================== MÓDULO: ASIGNACIONES ====================
 
 // Entrega <-> AsignacionEntrega (1:N)
-// Una entrega puede tener múltiples asignaciones (reasignaciones)
 Entrega.hasMany(AsignacionEntrega, { 
     foreignKey: 'entrega_id', 
     as: 'asignaciones' 
@@ -63,7 +72,6 @@ AsignacionEntrega.belongsTo(Entrega, {
 });
 
 // Repartidor <-> AsignacionEntrega (1:N)
-// Un repartidor puede tener múltiples asignaciones en su historial
 Repartidor.hasMany(AsignacionEntrega, { 
     foreignKey: 'repartidor_id', 
     as: 'asignaciones' 
@@ -76,7 +84,6 @@ AsignacionEntrega.belongsTo(Repartidor, {
 // ==================== MÓDULO: INCIDENCIAS ====================
 
 // Entrega <-> IncidenciaEntrega (1:N)
-// Una entrega puede tener múltiples incidencias
 Entrega.hasMany(IncidenciaEntrega, { 
     foreignKey: 'entrega_id', 
     as: 'incidencias' 
@@ -87,12 +94,77 @@ IncidenciaEntrega.belongsTo(Entrega, {
 });
 
 // Repartidor <-> IncidenciaEntrega (1:N)
-// Un repartidor puede reportar múltiples incidencias
 Repartidor.hasMany(IncidenciaEntrega, { 
     foreignKey: 'repartidor_id', 
     as: 'incidencias_reportadas' 
 });
 IncidenciaEntrega.belongsTo(Repartidor, { 
+    foreignKey: 'repartidor_id', 
+    as: 'repartidor' 
+});
+
+// ==================== MÓDULO: UBICACIONES ====================
+
+// Repartidor <-> HistorialUbicacionRepartidor (1:N)
+Repartidor.hasMany(HistorialUbicacionRepartidor, { 
+    foreignKey: 'repartidor_id', 
+    as: 'ubicaciones' 
+});
+HistorialUbicacionRepartidor.belongsTo(Repartidor, { 
+    foreignKey: 'repartidor_id', 
+    as: 'repartidor' 
+});
+
+// Entrega <-> HistorialUbicacionRepartidor (1:N)
+Entrega.hasMany(HistorialUbicacionRepartidor, { 
+    foreignKey: 'entrega_id', 
+    as: 'ubicaciones_repartidor' 
+});
+HistorialUbicacionRepartidor.belongsTo(Entrega, { 
+    foreignKey: 'entrega_id', 
+    as: 'entrega' 
+});
+
+// ==================== MÓDULO: NOTIFICACIONES ====================
+
+// Entrega <-> NotificacionLogistica (1:N)
+Entrega.hasMany(NotificacionLogistica, { 
+    foreignKey: 'entrega_id', 
+    as: 'notificaciones' 
+});
+NotificacionLogistica.belongsTo(Entrega, { 
+    foreignKey: 'entrega_id', 
+    as: 'entrega' 
+});
+
+// ==================== MÓDULO: CALIFICACIONES ====================
+
+// Entrega <-> CalificacionEntrega (1:1)
+Entrega.hasOne(CalificacionEntrega, { 
+    foreignKey: 'entrega_id', 
+    as: 'calificacion' 
+});
+CalificacionEntrega.belongsTo(Entrega, { 
+    foreignKey: 'entrega_id', 
+    as: 'entrega' 
+});
+
+// Repartidor <-> CalificacionEntrega (1:N)
+Repartidor.hasMany(CalificacionEntrega, { 
+    foreignKey: 'repartidor_id', 
+    as: 'calificaciones' 
+});
+CalificacionEntrega.belongsTo(Repartidor, { 
+    foreignKey: 'repartidor_id', 
+    as: 'repartidor' 
+});
+
+// Repartidor <-> HistorialEstadoEntrega (1:N)
+Repartidor.hasMany(HistorialEstadoEntrega, { 
+    foreignKey: 'repartidor_id', 
+    as: 'historial_estados' 
+});
+HistorialEstadoEntrega.belongsTo(Repartidor, { 
     foreignKey: 'repartidor_id', 
     as: 'repartidor' 
 });
@@ -104,13 +176,24 @@ IncidenciaEntrega.belongsTo(Repartidor, {
 module.exports = {
     sequelize,
     
+    // Modelos de Categorías
+    CategoriaOrden,
+    
     // Modelos de Repartidores
     Repartidor,
-    EstadoOperativoRepartidor,
     
     // Modelos de Logística
     Entrega,
     AsignacionEntrega,
     HistorialEstadoEntrega,
-    IncidenciaEntrega
+    IncidenciaEntrega,
+    
+    // Modelos de Ubicaciones
+    HistorialUbicacionRepartidor,
+    
+    // Modelos de Notificaciones
+    NotificacionLogistica,
+    
+    // Modelos de Calificaciones
+    CalificacionEntrega
 };

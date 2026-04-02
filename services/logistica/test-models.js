@@ -4,54 +4,48 @@
  */
 
 require('dotenv').config();
-const { 
-    sequelize, 
-    testConnection, 
-    syncDatabase,
-    createDatabaseIfNotExists,
-    initDatabase
-} = require('./db/db');
+const { sequelize, testConnection } = require('./src/config/database');
+const env = require('./src/config/env');
 
 const {
+    CategoriaOrden,
     Repartidor,
-    EstadoOperativoRepartidor,
     Entrega,
     AsignacionEntrega,
     HistorialEstadoEntrega,
-    IncidenciaEntrega
+    IncidenciaEntrega,
+    HistorialUbicacionRepartidor,
+    NotificacionLogistica,
+    CalificacionEntrega
 } = require('./src/models');
 
 async function testModels() {
     console.log('\n╔═══════════════════════════════════════════════════════════╗');
     console.log('║     PRUEBA DE MODELOS - MÓDULO DE LOGÍSTICA              ║');
+    console.log('║              PostgreSQL v3.0                              ║');
     console.log('╚═══════════════════════════════════════════════════════════╝\n');
 
     try {
-        // 1. Crear base de datos si no existe
-        console.log('🔧 Paso 1: Verificando/Creando base de datos...');
-        const dbCreated = await createDatabaseIfNotExists();
-        if (!dbCreated) {
-            throw new Error('No se pudo crear la base de datos');
-        }
-        console.log('');
-
-        // 2. Probar conexión
-        console.log('🔌 Paso 2: Probando conexión a la base de datos...');
+        // 1. Probar conexión
+        console.log('🔌 Paso 1: Probando conexión a la base de datos...\n');
         const connected = await testConnection();
         if (!connected) {
             throw new Error('No se pudo conectar a la base de datos');
         }
         console.log('');
 
-        // 3. Verificar modelos cargados
-        console.log('📦 Paso 3: Verificando modelos cargados...');
+        // 2. Verificar modelos cargados
+        console.log('📦 Paso 2: Verificando modelos cargados...\n');
         const modelos = [
+            'CategoriaOrden',
             'Repartidor',
-            'EstadoOperativoRepartidor',
             'Entrega',
             'AsignacionEntrega',
             'HistorialEstadoEntrega',
-            'IncidenciaEntrega'
+            'IncidenciaEntrega',
+            'HistorialUbicacionRepartidor',
+            'NotificacionLogistica',
+            'CalificacionEntrega'
         ];
 
         modelos.forEach(modelo => {
@@ -64,54 +58,53 @@ async function testModels() {
         });
         console.log('');
 
-        // 4. Verificar relaciones
-        console.log('🔗 Paso 4: Verificando relaciones entre modelos...');
+        // 3. Verificar relaciones
+        console.log('🔗 Paso 3: Verificando relaciones entre modelos...\n');
+        
+        console.log('   CategoriaOrden:');
+        console.log(`      → entregas: ${CategoriaOrden.associations.entregas ? '✅' : '❌'}`);
         
         console.log('   Repartidor:');
-        console.log(`      → entregas: ${Repartidor.associations.entregas ? '✅' : '❌'}`);
         console.log(`      → asignaciones: ${Repartidor.associations.asignaciones ? '✅' : '❌'}`);
-        console.log(`      → estado_operativo: ${Repartidor.associations.estado_operativo ? '✅' : '❌'}`);
+        console.log(`      → incidencias_reportadas: ${Repartidor.associations.incidencias_reportadas ? '✅' : '❌'}`);
+        console.log(`      → ubicaciones: ${Repartidor.associations.ubicaciones ? '✅' : '❌'}`);
+        console.log(`      → calificaciones: ${Repartidor.associations.calificaciones ? '✅' : '❌'}`);
         
         console.log('   Entrega:');
+        console.log(`      → categoria: ${Entrega.associations.categoria ? '✅' : '❌'}`);
         console.log(`      → historial: ${Entrega.associations.historial ? '✅' : '❌'}`);
         console.log(`      → asignaciones: ${Entrega.associations.asignaciones ? '✅' : '❌'}`);
         console.log(`      → incidencias: ${Entrega.associations.incidencias ? '✅' : '❌'}`);
-        console.log(`      → repartidor: ${Entrega.associations.repartidor ? '✅' : '❌'}`);
+        console.log(`      → notificaciones: ${Entrega.associations.notificaciones ? '✅' : '❌'}`);
+        console.log(`      → calificacion: ${Entrega.associations.calificacion ? '✅' : '❌'}`);
         
         console.log('');
 
-        // 5. Sincronizar modelos (sin force para no borrar datos)
-        console.log('🔄 Paso 5: Sincronizando modelos con la base de datos...');
-        console.log('   ⚠️  Usando { alter: true } para ajustar tablas existentes');
-        
-        const synced = await syncDatabase({ alter: true });
-        
-        if (synced) {
-            console.log('   ✅ Sincronización completada');
-        }
-        console.log('');
-
-        // 6. Resumen
+        // 4. Resumen
         console.log('╔═══════════════════════════════════════════════════════════╗');
         console.log('║                    ✅ PRUEBA EXITOSA                      ║');
         console.log('╠═══════════════════════════════════════════════════════════╣');
-        console.log('║  • Base de datos creada/verificada                       ║');
-        console.log('║  • 6 modelos cargados correctamente                      ║');
+        console.log('║  • Conexión a PostgreSQL establecida                     ║');
+        console.log('║  • 9 modelos cargados correctamente                      ║');
         console.log('║  • Relaciones configuradas                               ║');
-        console.log('║  • Tablas sincronizadas con la base de datos             ║');
         console.log('╚═══════════════════════════════════════════════════════════╝\n');
 
-        // 7. Mostrar información adicional
+        // 5. Mostrar información adicional
         console.log('📊 INFORMACIÓN DE MODELOS:\n');
-        console.log('Tabla                           PK                    Timestamps');
-        console.log('────────────────────────────────────────────────────────────────');
-        console.log(`entregas                        id_entrega            ✅`);
-        console.log(`asignaciones_entrega            id_asignacion         ✅ (solo created_at)`);
-        console.log(`historial_estados_entrega       id_historial_estado   ✅ (solo created_at)`);
-        console.log(`incidencias_entrega             id_incidencia         ✅`);
-        console.log(`repartidores                    id_repartidor         ✅`);
-        console.log(`estados_operativos_repartidor   id_estado_operativo   ✅ (solo updated_at)`);
+        console.log('Tabla                                PK                         Timestamps');
+        console.log('─────────────────────────────────────────────────────────────────────────');
+        console.log(`categorias_orden                     id_categoria               ✅`);
+        console.log(`repartidores                         id_repartidor              ✅`);
+        console.log(`entregas                             id_entrega                 ✅`);
+        console.log(`asignaciones_entrega                 id_asignacion              ✅ (solo created_at)`);
+        console.log(`historial_estados_entrega            id_historial_estado        ✅ (solo created_at)`);
+        console.log(`incidencias_entrega                  id_incidencia              ✅`);
+        console.log(`historial_ubicaciones_repartidor     id_ubicacion               ✅ (solo created_at)`);
+        console.log(`notificaciones_logistica             id_notificacion            ✅ (solo created_at)`);
+        console.log(`calificaciones_entrega               id_calificacion            ✅ (solo created_at)`);
         console.log('');
+        
+        console.log('💡 Para sincronizar tablas ejecuta: node syncDatabase.js\n');
 
         process.exit(0);
 

@@ -3,15 +3,15 @@ const { Sequelize } = require('sequelize');
 // Nombre de la base de datos
 const DB_NAME = process.env.DB_NAME || 'modulo_logistica_db';
 
-// Conexión sin especificar base de datos (para crearla si no existe)
-const sequelizeWithoutDB = new Sequelize(
-    '',
-    process.env.DB_USER || 'root',
-    process.env.DB_PASSWORD || '',
+// Conexión a PostgreSQL sin especificar base de datos (para crearla)
+const sequelizeAdmin = new Sequelize(
+    'postgres', // Base de datos por defecto de PostgreSQL
+    process.env.DB_USER || 'admin',
+    process.env.DB_PASSWORD || 'admin123',
     {
         host: process.env.DB_HOST || 'localhost',
-        port: process.env.DB_PORT || 3306,
-        dialect: 'mysql',
+        port: process.env.DB_PORT || 5432,
+        dialect: 'postgres',
         logging: false
     }
 );
@@ -19,12 +19,12 @@ const sequelizeWithoutDB = new Sequelize(
 // Configuración de la base de datos principal
 const sequelize = new Sequelize(
     DB_NAME,
-    process.env.DB_USER || 'root',
-    process.env.DB_PASSWORD || '',
+    process.env.DB_USER || 'admin',
+    process.env.DB_PASSWORD || 'admin123',
     {
         host: process.env.DB_HOST || 'localhost',
-        port: process.env.DB_PORT || 3306,
-        dialect: 'mysql',
+        port: process.env.DB_PORT || 5432,
+        dialect: 'postgres',
         logging: process.env.NODE_ENV === 'development' ? console.log : false,
         pool: {
             max: 5,
@@ -33,30 +33,42 @@ const sequelize = new Sequelize(
             idle: 10000
         },
         define: {
-            charset: 'utf8mb4',
-            collate: 'utf8mb4_unicode_ci',
             timestamps: true
         }
     }
 );
 
-// Función para crear la base de datos si no existe
+// Función para crear la base de datos si no existe (PostgreSQL)
 const createDatabaseIfNotExists = async () => {
     try {
-        await sequelizeWithoutDB.authenticate();
+        console.log(`🔍 [LOGÍSTICA] Verificando si la base de datos '${DB_NAME}' existe...`);
         
-        // Crear la base de datos si no existe
-        await sequelizeWithoutDB.query(
-            `CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` 
-             CHARACTER SET utf8mb4 
-             COLLATE utf8mb4_unicode_ci;`
+        // Conectar a la base de datos 'postgres' por defecto
+        await sequelizeAdmin.authenticate();
+        
+        // Verificar si la base de datos existe
+        const [results] = await sequelizeAdmin.query(
+            `SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'`
         );
         
-        console.log(`✅ [LOGÍSTICA] Base de datos '${DB_NAME}' verificada/creada correctamente.`);
-        await sequelizeWithoutDB.close();
+        if (results.length === 0) {
+            // La base de datos no existe, crearla
+            console.log(`🔧 [LOGÍSTICA] Creando base de datos '${DB_NAME}'...`);
+            await sequelizeAdmin.query(`CREATE DATABASE ${DB_NAME}`);
+            console.log(`✅ [LOGÍSTICA] Base de datos '${DB_NAME}' creada exitosamente.`);
+        } else {
+            console.log(`✅ [LOGÍSTICA] Base de datos '${DB_NAME}' ya existe.`);
+        }
+        
+        await sequelizeAdmin.close();
         return true;
     } catch (error) {
-        console.error('❌ [LOGÍSTICA] Error al crear la base de datos:', error.message);
+        console.error('❌ [LOGÍSTICA] Error al crear/verificar la base de datos:', error.message);
+        try {
+            await sequelizeAdmin.close();
+        } catch (e) {
+            // Ignorar errores al cerrar
+        }
         return false;
     }
 };
@@ -112,7 +124,9 @@ const initDatabase = async (options = {}) => {
 };
 
 module.exports = sequelize;
+module.exports.sequelize = sequelize;
 module.exports.testConnection = testConnection;
 module.exports.syncDatabase = syncDatabase;
 module.exports.createDatabaseIfNotExists = createDatabaseIfNotExists;
 module.exports.initDatabase = initDatabase;
+

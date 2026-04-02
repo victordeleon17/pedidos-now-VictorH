@@ -1,2 +1,3 @@
-// Exportar rutas de incidencias
-module.exports = {};
+const incidenciasRoutes = require('./incidencias.routes');
+
+module.exports = incidenciasRoutes;
