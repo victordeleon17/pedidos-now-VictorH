@@ -1,5 +1,5 @@
 const service = require('../services/compensacion.service');
-
+//Prueba conexion git
 const crearCompensacion = async (req, res) => {
     try {
         const data = req.body;
