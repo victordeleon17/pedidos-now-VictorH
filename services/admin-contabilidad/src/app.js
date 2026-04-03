@@ -40,3 +40,5 @@ app.listen(PORT, () => {
 console.log ("Corriendo app.js de admin");
 
 console.log(process.env.DB_USER);
+
+console.log("Prueba de escritura");
