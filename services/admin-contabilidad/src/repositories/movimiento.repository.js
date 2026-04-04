@@ -1,5 +1,12 @@
 const db = require('../config/db');
 
+const getAllMovimientos = async () => {
+    const [rows] = await db.query(
+        'SELECT * FROM movimiento_financiero'
+    );
+    return rows;
+};
+
 const crearMovimiento = async (data) => {
     const [result] = await db.query(
         `INSERT INTO movimiento_financiero
@@ -54,7 +61,6 @@ const crearEgresoConn = async (conn, data) => {
             data.descripcion
         ]
     );
-
     return result.insertId;
 };
 
@@ -80,5 +86,6 @@ module.exports = {
     crearEgreso,
     crearEgresoConn, 
     restarSaldo,
-    getFondos
+    getFondos,
+    getAllMovimientos
 }

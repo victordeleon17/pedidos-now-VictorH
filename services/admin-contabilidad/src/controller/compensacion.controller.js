@@ -3,7 +3,7 @@ const repo = require('../repositories/compensacion.repository');
 
 const getAllCompensaciones = async (req, res) => {
     try {
-        const compensaciones = await repo.getAllCompnesaciones();
+        const compensaciones = await repo.getAllCompensaciones();
         res.json({
             ok: true,
             data: compensaciones,
@@ -11,7 +11,7 @@ const getAllCompensaciones = async (req, res) => {
         });
     } catch (error) {
         console.error(error);
-        res.staus(500).json({
+        res.status(500).json({
             ok: false,
             error: 'Error al obtener compensaciones',
             detalle: error.message
