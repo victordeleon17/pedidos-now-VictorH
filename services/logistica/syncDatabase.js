@@ -32,10 +32,10 @@ const syncDatabase = async () => {
         
         // Sincronizar según el ambiente
         if (env.NODE_ENV === 'production') {
-            // En producción: solo crea tablas nuevas, no modifica existentes
-            console.log('⚙️  Modo PRODUCCIÓN: Solo creación de tablas nuevas...');
-            await sequelize.sync({ alter: false });
-            console.log('✅ Base de datos sincronizada (producción: sin modificaciones).\n');
+            // En producción: crea tablas si no existen
+            console.log('⚙️  Modo PRODUCCIÓN: Creando tablas...');
+            await sequelize.sync();
+            console.log('✅ Base de datos sincronizada (producción: tablas creadas).\n');
         } else {
             // En desarrollo: permite modificar estructura
             console.log('⚙️  Modo DESARROLLO: Permitiendo alteraciones de estructura...');
