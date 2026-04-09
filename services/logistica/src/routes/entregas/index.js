@@ -1,2 +1,3 @@
-// Exportar rutas de entregas
-module.exports = {};
+const entregasRoutes = require('./entregas.routes');
+
+module.exports = entregasRoutes;
