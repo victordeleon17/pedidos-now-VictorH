@@ -16,7 +16,7 @@ const HorarioRestaurante = sequelize.define('HorarioRestaurante', {
     }
   },
   dia_semana: {
-    type: DataTypes.TINYINT,
+    type: DataTypes.SMALLINT,
     allowNull: false,
     comment: '0=Lunes, 1=Martes, ..., 6=Domingo'
   },

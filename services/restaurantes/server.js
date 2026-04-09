@@ -7,16 +7,20 @@ const startServer = async () => {
     // Probar conexión a la BD
     await testConnection();
     
-    // Sincronizar modelos (en producción usar migraciones)
-    if (env.NODE_ENV === 'development') {
-      await sequelize.sync({ alter: false });
-      console.log('📦 Modelos sincronizados con la base de datos.');
+    // Sincronizar modelos solo en desarrollo o primera vez
+    if (env.NODE_ENV === 'production') {
+      // En producción: solo verificar conexión, no sincronizar
+      console.log('📦 Modo producción: Base de datos lista (sin sincronización automática).');
+    } else {
+      // En desarrollo: permite modificar estructura
+      await sequelize.sync({ alter: true });
+      console.log('📦 Modelos sincronizados (desarrollo: con alter).');
     }
     
     // Iniciar servidor
     const PORT = env.PORT;
-    app.listen(PORT, () => {
-      console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`🚀 Servidor corriendo en 0.0.0.0:${PORT}`);
       console.log(`🌍 Ambiente: ${env.NODE_ENV}`);
     });
   } catch (error) {
