@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-
 const controller = require("../controllers/payments.controller");
 
 router.post("/payments/calculate", controller.calculate);

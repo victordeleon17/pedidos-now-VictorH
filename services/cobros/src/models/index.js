@@ -1,0 +1,16 @@
+module.exports = {
+  PaymentMethodModel: require("./paymentMethod.model"),
+  PaymentStatusModel: require("./paymentStatus.model"),
+  CouponModel: require("./coupon.model"),
+  OrderSnapshotModel: require("./orderSnapshot.model"),
+  OrderItemSnapshotModel: require("./orderItemSnapshot.model"),
+  PaymentModel: require("./payment.model"),
+  PaymentAttemptModel: require("./paymentAttempt.model"),
+  PaymentDiscountAppliedModel: require("./paymentDiscountApplied.model"),
+  RefundModel: require("./refund.model"),
+  CourierWalletModel: require("./courierWallet.model"),
+  CourierTransactionModel: require("./courierTransaction.model"),
+  WalletSettlementModel: require("./walletSettlement.model"),
+  WalletWithdrawalModel: require("./walletWithdrawal.model"),
+  WalletAdjustmentModel: require("./walletAdjustment.model"),
+};

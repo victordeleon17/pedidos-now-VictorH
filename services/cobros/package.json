@@ -1,7 +1,8 @@
 {
   "name": "payments-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Microservicio de cobros y billetera virtual para repartidores",
+  "main": "src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon src/app.js",
@@ -10,7 +11,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
