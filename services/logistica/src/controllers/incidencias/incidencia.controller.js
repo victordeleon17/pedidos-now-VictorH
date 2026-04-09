@@ -1,6 +1,6 @@
 const { IncidenciaEntrega, Entrega } = require('../../models');
 const { Op } = require('sequelize');
-const sequelize = require('../../../db/db');
+const { sequelize } = require('../../config/database');
 
 // Crear incidencia
 exports.crearIncidencia = async (req, res) => {

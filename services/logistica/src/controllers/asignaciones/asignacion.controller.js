@@ -40,7 +40,7 @@ exports.asignarRepartidor = async (req, res) => {
                 estado_anterior,
                 estado_nuevo: 'asignada',
                 cambiado_por_usuario_id: req.usuario?.id || 1,
-                comentario: 'Repartidor asignado'
+                origen_cambio: 'manual'
             });
         }
 
@@ -99,8 +99,9 @@ exports.reasignarRepartidor = async (req, res) => {
             entrega_id: id,
             estado_anterior: entrega.estado_entrega,
             estado_nuevo: entrega.estado_entrega,
+            repartidor_id,
             cambiado_por_usuario_id: req.usuario?.id || 1,
-            comentario: comentario || `Repartidor reasignado a ID: ${repartidor_id}`
+            origen_cambio: 'manual'
         });
 
         res.status(200).json({
@@ -156,7 +157,7 @@ exports.obtenerHistorialAsignaciones = async (req, res) => {
 
         const asignaciones = await AsignacionEntrega.findAll({
             where: { entrega_id: id },
-            order: [['fecha_asignacion', 'DESC']]
+            order: [['created_at', 'DESC']]
         });
 
         res.status(200).json({
@@ -187,7 +188,7 @@ exports.obtenerEntregasPorRepartidor = async (req, res) => {
                 model: Entrega,
                 as: 'entrega'
             }],
-            order: [['fecha_asignacion', 'DESC']]
+            order: [['created_at', 'DESC']]
         });
 
         res.status(200).json({
@@ -233,7 +234,7 @@ exports.desasignarRepartidor = async (req, res) => {
             estado_anterior,
             estado_nuevo: 'pendiente',
             cambiado_por_usuario_id: req.usuario?.id || 1,
-            comentario: comentario || 'Repartidor desasignado'
+            origen_cambio: 'manual'
         });
 
         res.status(200).json({

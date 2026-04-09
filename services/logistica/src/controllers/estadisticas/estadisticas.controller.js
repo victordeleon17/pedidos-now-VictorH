@@ -1,6 +1,6 @@
 const { Entrega, AsignacionEntrega, IncidenciaEntrega, HistorialEstadoEntrega } = require('../../models');
 const { Op } = require('sequelize');
-const sequelize = require('../../../db/db');
+const { sequelize } = require('../../config/database');
 
 // Obtener estadísticas generales del dashboard
 exports.obtenerEstadisticasGenerales = async (req, res) => {
@@ -176,7 +176,7 @@ exports.obtenerRendimientoRepartidores = async (req, res) => {
         if (empresa_id) whereEntrega.empresa_id = empresa_id;
         
         if (fecha_inicio && fecha_fin) {
-            whereAsignacion.fecha_asignacion = {
+            whereAsignacion.created_at = {
                 [Op.between]: [new Date(fecha_inicio), new Date(fecha_fin)]
             };
         }

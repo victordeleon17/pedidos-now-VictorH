@@ -4,7 +4,7 @@
 // Este archivo centraliza la importación de todos los modelos,
 // define sus relaciones y los exporta para uso en controladores
 
-const sequelize = require('../../db/db');
+const { sequelize } = require('../config/database');
 
 // ============================================================
 // IMPORTAR TODOS LOS MODELOS
