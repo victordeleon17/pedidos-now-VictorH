@@ -1,4 +1,5 @@
 // Admin-contabilidad Kenneth
+// Admin-contabilidad Emmanuel 
 
 const { Pool } = require('pg');
 require('dotenv').config();

@@ -72,11 +72,19 @@ const getFondos = async () => {
     );
     return result.rows;
 };
+const getAllMovimientos = async () => {
+    const result = await db.query(
+        'SELECT * FROM movimiento_financiero'
+    );
+    return result.rows;
+};
+
 
 module.exports = {
     crearMovimiento,
     actualizarSaldo,
     crearEgreso,
     restarSaldo,
-    getFondos
+    getFondos,
+    getAllMovimientos
 };
