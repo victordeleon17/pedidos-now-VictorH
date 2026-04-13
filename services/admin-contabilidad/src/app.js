@@ -8,6 +8,10 @@ const movimientoRoutes = require('./routes/movimiento.routes');
 const reembolsoRoutes = require('./routes/reembolso.route');
 const compesacionRoutes = require('./routes/compensacion.routes');
 
+const initDB = require('./database/init');
+
+
+
 const app = express();
 app.use(express.json());
 
@@ -33,18 +37,16 @@ app.get('/debug', (req, res) =>  {
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
-});
+(async () => {
+    await initDB(); 
 
-console.log ("Corriendo app.js de admin");
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en puerto ${PORT}`);
+    });
+})();
 
+console.log("Corriendo app.js de admin");
 console.log(process.env.DB_USER);
 
 console.log("Prueba de escritura 1");
 
-<<<<<<< HEAD
-console.log("Prueba de escritura 2");
-=======
-console.log("Prueba de AndreiHarkovLev");
->>>>>>> 5fe67ba6594b868558bb95658650512e8dbe07dc
