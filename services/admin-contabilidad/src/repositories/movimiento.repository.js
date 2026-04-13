@@ -2,6 +2,13 @@
 
 const db = require('../config/db');
 
+const getAllMovimientos = async () => {
+    const result = await db.query(
+        'SELECT * FROM movimiento_financiero'
+    );
+    return result.rows;
+};
+
 const crearMovimiento = async (data) => {
 
     const result = await db.query(
@@ -72,13 +79,6 @@ const getFondos = async () => {
     );
     return result.rows;
 };
-const getAllMovimientos = async () => {
-    const result = await db.query(
-        'SELECT * FROM movimiento_financiero'
-    );
-    return result.rows;
-};
-
 
 module.exports = {
     crearMovimiento,
