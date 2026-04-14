@@ -13,16 +13,21 @@ const movimientoRoutes = require('./routes/movimiento.routes');
 const reembolsoRoutes = require('./routes/reembolso.routes');
 const compesacionRoutes = require('./routes/compensacion.routes');
 
+const initDB = require('./database/init');
+
 const app = express();
-//Middlewares de seguridad, logging y compresión
+
+// Middlewares
 app.use(cors({
     origin: process.env.BROKER_URL || 'http://localhost:5000',
     credentials: true
 }));
+app.use(helmet());
 app.use(morgan('dev'));
 app.use(compression());
 app.use(express.json());
 
+// Rutas
 app.use('/', testRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api/pagos-agentes', pagosAgentesRoutes);
@@ -31,7 +36,7 @@ app.use('/api/movimientos', movimientoRoutes);
 app.use('/api/reembolsos', reembolsoRoutes);
 app.use('/api/compensaciones', compesacionRoutes);
 
-//Health check
+// Health check
 app.get('/', (req, res) => {
     res.json({ message: 'Microservicio Admin/Contabilidad OK' });
 });
@@ -44,7 +49,7 @@ app.get('/debug', (req, res) =>  {
     res.send('OK');
 });
 
-//Verificación de errores del middleware
+// Middleware de errores
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(err.status || 500).json({
@@ -54,11 +59,15 @@ app.use((err, req, res, next) => {
     });
 });
 
-//Inicio del servidor
+// Inicio del servidor
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en puerto ${PORT}`);
-});
+(async () => {
+    await initDB(); 
 
-console.log(process.env.DB_USER);
+    app.listen(PORT, () => {
+        console.log(`Servidor corriendo en puerto ${PORT}`);
+        console.log("Corriendo app.js de admin");
+        console.log("DB_USER:", process.env.DB_USER);
+    });
+})();
