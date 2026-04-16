@@ -45,15 +45,16 @@ const crearPedidoContabilidad = async ({
   const result = await db.query(query, values);
   return result.rows[0];
 };
-const actualizarEstadoPedidoContabilidad = async (pedido_id_externo, estado) => {
+// Admin-contabilidad Victor
+const actualizarEstadoPedidoContabilidad = async (pedido_id_externo, estado, modulo_origen = null) => {
   const query = `
     UPDATE pedido_contabilidad
     SET estado = $1
     WHERE pedido_id_externo = $2
+      AND ($3::VARCHAR IS NULL OR modulo_origen = $3)
     RETURNING *
   `;
-
-  const values = [estado, pedido_id_externo];
+  const values = [estado, pedido_id_externo, modulo_origen];
   const result = await db.query(query, values);
 
   return result.rows[0] || null;
@@ -66,7 +67,8 @@ const actualizarResumenPedidoContabilidad = async ({
   descuento,
   comision,
   total,
-  estado
+  estado,
+  modulo_origen = null
 }) => {
   const query = `
     UPDATE pedido_contabilidad
@@ -77,6 +79,7 @@ const actualizarResumenPedidoContabilidad = async ({
       total = $4,
       estado = $5
     WHERE pedido_id_externo = $6
+      AND ($7::VARCHAR IS NULL OR modulo_origen = $7)
     RETURNING *
   `;
 
@@ -86,7 +89,8 @@ const actualizarResumenPedidoContabilidad = async ({
     comision,
     total,
     estado,
-    pedido_id_externo
+    pedido_id_externo,
+    modulo_origen
   ];
 
   const result = await db.query(query, values);

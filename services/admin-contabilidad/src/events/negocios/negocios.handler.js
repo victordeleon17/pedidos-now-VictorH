@@ -1,4 +1,4 @@
-// Admin-contabilidad Emmanuel
+// Admin-contabilidad Victor
 
 const movimientoService = require('../../services/movimiento.service');
 const eventoRepo = require('../../repositories/evento.repository');
@@ -9,7 +9,7 @@ module.exports = async (evento) => {
   if (evento.tipo === 'PEDIDO_ENTREGADO') {
     const {
       pedido_id,
-      restaurante_id,
+      negocio_id,
       cliente_id,
       subtotal,
       descuento,
@@ -17,18 +17,16 @@ module.exports = async (evento) => {
       total
     } = evento.data;
 
-    // Guardar evento recibido
     await eventoRepo.guardarEvento({
-      modulo_origen: 'restaurantes',
+      modulo_origen: 'negocios',
       tipo_evento: evento.tipo,
       referencia_id: pedido_id,
       payload: evento.data
     });
 
-    // Registrar ingreso financiero del pedido del restaurante
-    await movimientoService.registrarIngresoPedidoRestaurante({
+    await movimientoService.registrarIngresoPedidoNegocio({
       pedido_id,
-      restaurante_id,
+      negocio_id,
       cliente_id,
       subtotal,
       descuento,
@@ -36,97 +34,96 @@ module.exports = async (evento) => {
       total
     });
 
-
     const entidadComercial = await entidadComercialRepo.obtenerPorEntidadExterna(
-        restaurante_id,
-        'restaurante'
+      negocio_id,
+      'negocio'
     );
 
     if (!entidadComercial) {
-    throw new Error(`No existe entidad_comercial activa para restaurante_id externo: ${restaurante_id}`);
+      throw new Error(`No existe entidad_comercial activa para negocio_id externo: ${negocio_id}`);
     }
-    
 
-    await pedidoContabilidadService.registrarPedidoRestaurante({
-        entidad_comercial_id: entidadComercial.id,
-        pedido_id_externo: pedido_id,
-        subtotal,
-        descuento,
-        comision,
-        total,
-        estado: 'completado'
+    await pedidoContabilidadService.registrarPedidoNegocio({
+      entidad_comercial_id: entidadComercial.id,
+      pedido_id_externo: pedido_id,
+      subtotal,
+      descuento,
+      comision,
+      total,
+      estado: 'completado'
     });
 
-    console.log(' Flujo completo restaurantes ejecutado');
+    console.log(' Flujo completo negocios ejecutado');
   }
+
   if (evento.tipo === 'PEDIDO_CANCELADO') {
     const {
       pedido_id,
-      restaurante_id,
+      negocio_id,
       monto_reembolso,
       motivo
     } = evento.data;
 
     await eventoRepo.guardarEvento({
-      modulo_origen: 'restaurantes',
+      modulo_origen: 'negocios',
       tipo_evento: evento.tipo,
       referencia_id: pedido_id,
       payload: evento.data
     });
 
-    await movimientoService.registrarEgresoCancelacionRestaurante({
+    await movimientoService.registrarEgresoCancelacionNegocio({
       pedido_id,
-      restaurante_id,
+      negocio_id,
       monto: monto_reembolso,
       motivo
     });
 
-    await pedidoContabilidadService.actualizarEstadoPedidoRestaurante({
+    await pedidoContabilidadService.actualizarEstadoPedidoNegocio({
       pedido_id_externo: pedido_id,
       estado: 'cancelado'
     });
 
-    console.log(' Flujo cancelación restaurantes ejecutado');
+    console.log(' Flujo cancelación negocios ejecutado');
   }
-    // Admin-contabilidad Emmanuel
+
   if (evento.tipo === 'PEDIDO_CANCELADO_CON_MULTA') {
     const {
       pedido_id,
-      restaurante_id,
+      negocio_id,
       monto_reembolso,
       multa,
       motivo
     } = evento.data;
 
     await eventoRepo.guardarEvento({
-      modulo_origen: 'restaurantes',
+      modulo_origen: 'negocios',
       tipo_evento: evento.tipo,
       referencia_id: pedido_id,
       payload: evento.data
     });
 
-    await movimientoService.registrarEgresoCancelacionRestaurante({
+    await movimientoService.registrarEgresoCancelacionNegocio({
       pedido_id,
-      restaurante_id,
+      negocio_id,
       monto: monto_reembolso,
       motivo: motivo || 'Reembolso por cancelación con multa'
     });
 
-    await movimientoService.registrarIngresoMultaCancelacionRestaurante({
+    await movimientoService.registrarIngresoMultaCancelacionNegocio({
       pedido_id,
-      restaurante_id,
+      negocio_id,
       monto: multa,
       motivo: motivo || 'Multa por cancelación de pedido'
     });
 
-    await pedidoContabilidadService.actualizarEstadoPedidoRestaurante({
+    await pedidoContabilidadService.actualizarEstadoPedidoNegocio({
       pedido_id_externo: pedido_id,
       estado: 'cancelado_con_multa'
     });
-  
-    console.log(' Flujo cancelación con multa restaurantes ejecutado');
+
+    console.log(' Flujo cancelación con multa negocios ejecutado');
   }
-    // Admin-contabilidad Emmanuel
+
   if (evento.tipo === 'PEDIDO_ACTUALIZADO') {
     const {
       pedido_id,
@@ -138,13 +135,13 @@ module.exports = async (evento) => {
     } = evento.data;
 
     await eventoRepo.guardarEvento({
-      modulo_origen: 'restaurantes',
+      modulo_origen: 'negocios',
       tipo_evento: evento.tipo,
       referencia_id: pedido_id,
       payload: evento.data
     });
 
-    await pedidoContabilidadService.actualizarResumenPedidoRestaurante({
+    await pedidoContabilidadService.actualizarResumenPedidoNegocio({
       pedido_id_externo: pedido_id,
       subtotal,
       descuento,
@@ -153,9 +150,6 @@ module.exports = async (evento) => {
       estado: estado || 'actualizado'
     });
 
-    console.log(' Flujo actualización pedido restaurante ejecutado');
+    console.log(' Flujo actualización pedido negocio ejecutado');
   }
 };
-
-
-//[prueba conexion Victor de leon ]
