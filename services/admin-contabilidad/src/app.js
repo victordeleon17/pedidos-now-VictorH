@@ -13,6 +13,12 @@ const movimientoRoutes = require('./routes/movimiento.routes');
 const reembolsoRoutes = require('./routes/reembolso.routes');
 const compesacionRoutes = require('./routes/compensacion.routes');
 
+// Admin-contabilidad Emmanuel
+const reportesRestaurantesRoutes = require('./routes/reportesRestaurantes.routes');
+
+
+
+
 const initDB = require('./database/init');
 
 const app = express();
@@ -35,6 +41,11 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/movimientos', movimientoRoutes);
 app.use('/api/reembolsos', reembolsoRoutes);
 app.use('/api/compensaciones', compesacionRoutes);
+
+// Admin-contabilidad Emmanuel
+app.use('/api/reportes-restaurantes', reportesRestaurantesRoutes);
+
+
 
 // Health check
 app.get('/', (req, res) => {

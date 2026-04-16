@@ -30,7 +30,7 @@ module.exports = async (evento) => {
         await movimientoService.registrarEgresoEnvio({
             pedido_id,
             repartidor_id,
-            monto: costo_envio
+            costo_envio
         });
 
         // 3. Registrar INGRESO
