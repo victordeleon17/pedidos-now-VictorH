@@ -5,6 +5,7 @@ const { validarToken } = require('../middleware/auth');
 
 console.log("CONTROLLER:", controller);
 
+//Rutas que requieren autenticación
 router.get('/ventas', validarToken, controller.getReporteVentas);
 router.get('/pedidos', validarToken, controller.getReportePedidos);
 router.get('/crecimiento', validarToken, controller.getReporteCrecimiento);
