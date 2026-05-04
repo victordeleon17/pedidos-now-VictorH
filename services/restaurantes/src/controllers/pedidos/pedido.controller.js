@@ -1,12 +1,14 @@
 //analisis
-const { sequelize } = require('../../config/database');
-const Pedido = require('../../models/pedidos/pedido.model');
-const EstadoPedido = require('../../models/pedidos/estado-pedido.model');
-const HistorialEstadosPedido = require('../../models/pedidos/historial-estados-pedido.model');
-const DetallePedido = require('../../models/pedidos/detalle-pedido.model');
-const Restaurante = require('../../models/restaurantes/restaurante.model');
-const Producto = require('../../models/productos/producto.model');
-const Combo = require('../../models/combos/combo.model');
+const {
+  sequelize,
+  Pedido,
+  EstadoPedido,
+  HistorialEstadosPedido,
+  DetallePedido,
+  Restaurante,
+  Producto,
+  Combo
+} = require('../../models');
 
 // 1=pendiente, 2=confirmado, 3=en_preparacion, 4=listo, 5=en_camino, 6=entregado, 7=cancelado
 const ESTADO = {
@@ -269,7 +271,7 @@ exports.create = async (req, res, next) => {
       total,
       direccion_entrega,
       notas:              notas || null,
-      fecha_pedido:       new Date()
+      fecha_creacion:     new Date()
     }, { transaction: t });
 
     for (const item of itemsValidados) {
