@@ -10,7 +10,6 @@ const CategoriaOrden = sequelize.define('CategoriaOrden', {
     codigo: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        unique: true,
         comment: 'Código técnico: FOOD, MARKET, PHARMACY, PACKAGE'
     },
     nombre: {
@@ -54,6 +53,7 @@ const CategoriaOrden = sequelize.define('CategoriaOrden', {
     createdAt: 'created_at',
     updatedAt: 'updated_at',
     indexes: [
+        { unique: true, fields: ['codigo'], name: 'uq_categorias_codigo' },
         { fields: ['activa'], name: 'idx_categorias_activa', where: { activa: true } },
         { fields: ['orden_display'], name: 'idx_categorias_orden_disp' }
     ],
