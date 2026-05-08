@@ -53,6 +53,26 @@ module.exports = {
         allowNull: false,
         defaultValue: 0
       },
+      weight_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      weather_traffic_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      insurance_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      priority_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
       courier_earned_fee: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,

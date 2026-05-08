@@ -50,6 +50,10 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'RESTRICT'
       },
+      card_type: {
+        type: Sequelize.STRING(30),
+        allowNull: true
+      },
       gross_amount: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false
@@ -69,6 +73,26 @@ module.exports = {
         allowNull: false
       },
       service_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      weight_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      weather_traffic_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      insurance_fee: {
+        type: Sequelize.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      priority_fee: {
         type: Sequelize.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0

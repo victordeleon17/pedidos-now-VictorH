@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: false
       },
+      card_type: {
+        type: DataTypes.STRING(30),
+        allowNull: true
+      },
       gross_amount: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false
@@ -55,6 +59,26 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       service_fee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      weight_fee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      weather_traffic_fee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      insurance_fee: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: 0
+      },
+      priority_fee: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: 0

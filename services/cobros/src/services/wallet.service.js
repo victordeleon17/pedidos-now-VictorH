@@ -22,10 +22,6 @@ async function getWalletSummary({ courierId, startDate, endDate }) {
     where: { courier_id: courierId }
   });
 
-  if (!wallet) {
-    throw new Error("Wallet not found for courier");
-  }
-
   const where = { courier_id: courierId };
 
   if (startDate || endDate) {
@@ -43,9 +39,9 @@ async function getWalletSummary({ courierId, startDate, endDate }) {
 
   return {
     balances: {
-      positiveBalance: money(wallet.available_balance),
-      appDebt: money(wallet.pending_debt_balance),
-      totalEarned: money(wallet.total_earned)
+      positiveBalance: money(wallet?.available_balance || 0),
+      appDebt: money(wallet?.pending_debt_balance || 0),
+      totalEarned: money(wallet?.total_earned || 0)
     },
     morosityState: resolveMorosityState(wallet),
     transactions: transactions.map((tx) => ({

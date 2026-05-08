@@ -8,7 +8,9 @@
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
     "orm:migrate": "sequelize-cli db:migrate",
-    "orm:seed": "sequelize-cli db:seed:all"
+    "orm:seed": "sequelize-cli db:seed:all",
+    "deploy:migrate": "npm run orm:migrate && npm run orm:seed",
+    "deploy:start": "npm run deploy:migrate && npm start"
   },
   "keywords": [],
   "author": "",
