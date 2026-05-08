@@ -1,7 +1,12 @@
 const walletService = require("../services/wallet.service");
+const {
+  validateWalletSummaryQuery,
+  validatePayPendingPayload
+} = require("../validators/wallet.validator");
 
 async function summary(req, res) {
   try {
+    validateWalletSummaryQuery(req.query);
     const result = await walletService.getWalletSummary({
       courierId: req.query.courierId,
       startDate: req.query.startDate,
@@ -16,6 +21,7 @@ async function summary(req, res) {
 
 async function payPending(req, res) {
   try {
+    validatePayPendingPayload(req.body);
     const result = await walletService.payPending(req.body);
     return res.json({ ok: true, result });
   } catch (error) {

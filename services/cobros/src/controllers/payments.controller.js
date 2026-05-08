@@ -1,7 +1,12 @@
 const paymentsService = require("../services/payments.service");
+const {
+  validateCalculatePayload,
+  validateCreatePaymentPayload
+} = require("../validators/payments.validator");
 
 async function calculate(req, res) {
   try {
+    validateCalculatePayload(req.body);
     const result = await paymentsService.calculatePreview(req.body);
     return res.json({ ok: true, result });
   } catch (error) {
@@ -11,6 +16,7 @@ async function calculate(req, res) {
 
 async function create(req, res) {
   try {
+    validateCreatePaymentPayload(req.body);
     const result = await paymentsService.createPayment(req.body);
     return res.status(201).json({ ok: true, result });
   } catch (error) {
