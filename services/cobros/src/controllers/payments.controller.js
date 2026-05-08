@@ -1,27 +1,20 @@
-const { ok, fail } = require("../helpers/responses");
 const paymentsService = require("../services/payments.service");
-const {
-  validateCalculatePayload,
-  validateCreatePaymentPayload,
-} = require("../validators/payments.validator");
 
 async function calculate(req, res) {
   try {
-    validateCalculatePayload(req.body);
     const result = await paymentsService.calculatePreview(req.body);
-    return ok(res, result);
+    return res.json({ ok: true, result });
   } catch (error) {
-    return fail(res, error.message, 400);
+    return res.status(400).json({ ok: false, error: error.message });
   }
 }
 
 async function create(req, res) {
   try {
-    validateCreatePaymentPayload(req.body);
     const result = await paymentsService.createPayment(req.body);
-    return ok(res, result, 201);
+    return res.status(201).json({ ok: true, result });
   } catch (error) {
-    return fail(res, error.message, 400);
+    return res.status(400).json({ ok: false, error: error.message });
   }
 }
 
@@ -30,21 +23,21 @@ async function getById(req, res) {
     const result = await paymentsService.getPaymentById(req.params.paymentId);
 
     if (!result) {
-      return fail(res, "Payment not found", 404);
+      return res.status(404).json({ ok: false, error: "Payment not found" });
     }
 
-    return ok(res, result);
+    return res.json({ ok: true, result });
   } catch (error) {
-    return fail(res, error.message, 500);
+    return res.status(400).json({ ok: false, error: error.message });
   }
 }
 
 async function list(req, res) {
   try {
     const result = await paymentsService.listPayments(req.query);
-    return ok(res, result);
+    return res.json({ ok: true, result });
   } catch (error) {
-    return fail(res, error.message, 400);
+    return res.status(400).json({ ok: false, error: error.message });
   }
 }
 
@@ -52,5 +45,5 @@ module.exports = {
   calculate,
   create,
   getById,
-  list,
+  list
 };

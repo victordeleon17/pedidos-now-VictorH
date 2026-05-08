@@ -1,5 +1,5 @@
 function money(value) {
-  return Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
+  return Number(Number(value || 0).toFixed(2));
 }
 
 module.exports = { money };
