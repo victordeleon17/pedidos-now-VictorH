@@ -169,9 +169,115 @@ const registrarIngresoMultaCancelacionRestaurante = async ({
         movimiento_id: movimientoId
     };
 };
+// Admin-contabilidad Victor
+const registrarIngresoPedidoNegocio = async ({
+    pedido_id,
+    negocio_id,
+    cliente_id,
+    subtotal,
+    descuento,
+    comision,
+    total
+}) => {
+    const cuenta_id = 1;
+
+    const descripcion = `Ingreso pedido negocio #${pedido_id} - negocio ${negocio_id}`;
+
+    const movimientoId = await repo.crearMovimiento({
+        cuenta_id,
+        tipo: 'ingreso',
+        subtipo: 'pedido_negocio',
+        modulo_origen: 'negocios',
+        referencia_id: negocio_id,
+        monto: total,
+        descripcion,
+        pedido_id,
+        estado: 'completado'
+    });
+
+    await repo.actualizarSaldo(cuenta_id, total);
+
+    return {
+        ok: true,
+        movimiento_id: movimientoId,
+        detalle: {
+            pedido_id,
+            negocio_id,
+            cliente_id,
+            subtotal,
+            descuento,
+            comision,
+            total
+        }
+    };
+};
+
+// Admin-contabilidad Victor
+const registrarEgresoCancelacionNegocio = async ({
+    pedido_id,
+    negocio_id,
+    monto,
+    motivo
+}) => {
+    const cuenta_id = 1;
+
+    const descripcion = motivo || `Cancelación pedido negocio #${pedido_id}`;
+
+    const movimientoId = await repo.crearMovimiento({
+        cuenta_id,
+        tipo: 'egreso',
+        subtipo: 'cancelacion_negocio',
+        modulo_origen: 'negocios',
+        referencia_id: negocio_id,
+        monto,
+        descripcion,
+        pedido_id,
+        estado: 'completado'
+    });
+
+    await repo.restarSaldo(cuenta_id, monto);
+
+    return {
+        ok: true,
+        movimiento_id: movimientoId
+    };
+};
+
+// Admin-contabilidad Victor
+const registrarIngresoMultaCancelacionNegocio = async ({
+    pedido_id,
+    negocio_id,
+    monto,
+    motivo
+}) => {
+    const cuenta_id = 1;
+
+    const descripcion = motivo || `Multa por cancelación pedido negocio #${pedido_id}`;
+
+    const movimientoId = await repo.crearMovimiento({
+        cuenta_id,
+        tipo: 'ingreso',
+        subtipo: 'multa_cancelacion_negocio',
+        modulo_origen: 'negocios',
+        referencia_id: negocio_id,
+        monto,
+        descripcion,
+        pedido_id,
+        estado: 'completado'
+    });
+
+    await repo.actualizarSaldo(cuenta_id, monto);
+
+    return {
+        ok: true,
+        movimiento_id: movimientoId
+    };
+};
+
 
 // Admin-contabilidad Kenneth
 // Admin-contabilidad Emmanuel
+// Admin-contabilidad Victor
 module.exports = {
     registrarIngresoPedido,
     registrarEgreso,
@@ -180,6 +286,9 @@ module.exports = {
     registrarEgresoCancelacionRestaurante,
     registrarIngresoMultaCancelacionRestaurante,
     registrarIngresoPedidoRestaurante,
-    obtenerFondos
+    obtenerFondos,
+    registrarIngresoPedidoNegocio,
+    registrarEgresoCancelacionNegocio,
+    registrarIngresoMultaCancelacionNegocio
 };
 
