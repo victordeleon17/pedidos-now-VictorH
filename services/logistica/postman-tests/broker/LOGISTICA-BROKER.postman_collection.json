@@ -1,0 +1,147 @@
+{
+  "info": {
+    "name": "Logistica - Broker",
+    "_postman_id": "logistica-broker-04052026",
+    "description": "Coleccion para que Broker mapee los endpoints de Logistica. Broker/Auth/Administracion aun no estan integrados; estos endpoints muestran el contrato REST actual para feed, asignacion, estados, repartidores simulados y notificaciones.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3005", "type": "string" },
+    { "key": "entrega_id", "value": "4", "type": "string" },
+    { "key": "repartidor_id", "value": "101", "type": "string" },
+    { "key": "restaurante_id", "value": "1", "type": "string" },
+    { "key": "pedido_id", "value": "2", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Categorias De Orden",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/categorias?activa=true", "host": ["{{base_url}}"], "path": ["api", "logistica", "categorias"], "query": [{ "key": "activa", "value": "true" }] },
+        "description": "Categorias disponibles para clasificar entregas: FOOD, MARKET, PHARMACY, PACKAGE, etc."
+      },
+      "response": []
+    },
+    {
+      "name": "Crear Entrega Desde Restaurante",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "1" }, { "key": "x-user-role", "value": "admin" }],
+        "url": { "raw": "{{base_url}}/api/logistica/entregas/restaurantes/{{restaurante_id}}/pedidos/{{pedido_id}}", "host": ["{{base_url}}"], "path": ["api", "logistica", "entregas", "restaurantes", "{{restaurante_id}}", "pedidos", "{{pedido_id}}"] },
+        "description": "Broker puede disparar o auditar la creacion de entrega desde un pedido de Restaurante. En produccion normalmente lo llamaria Restaurante/Negocio directamente.",
+        "body": { "mode": "raw", "raw": "{\n  \"cliente_nombre\": \"Cliente Broker\",\n  \"cliente_telefono\": \"5555-2222\",\n  \"destino_lat\": 14.84,\n  \"destino_lng\": -91.52\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "Crear Entrega Directa",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": { "raw": "{{base_url}}/api/logistica/entregas", "host": ["{{base_url}}"], "path": ["api", "logistica", "entregas"] },
+        "description": "Contrato generico para crear entregas sin depender de Restaurante. Negocios puede adaptar este body si no tiene endpoint dedicado todavia.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tipo_origen\": \"manual\",\n  \"origen_id\": 9001,\n  \"empresa_id\": 50,\n  \"cliente_id\": 500,\n  \"categoria_codigo\": \"PACKAGE\",\n  \"metodo_pago\": \"CASH\",\n  \"tarifa_ofrecida\": 20,\n  \"monto_cobrar\": 100,\n  \"distancia_estimada_km\": 3.5,\n  \"negocio_nombre\": \"Negocio Demo\",\n  \"negocio_telefono\": \"5555-9999\",\n  \"negocio_direccion\": \"Direccion origen\",\n  \"origen_lat\": 14.8355,\n  \"origen_lng\": -91.5275,\n  \"cliente_nombre\": \"Cliente Demo\",\n  \"cliente_telefono\": \"5555-0000\",\n  \"direccion_entrega\": \"Direccion destino\",\n  \"destino_lat\": 14.84,\n  \"destino_lng\": -91.52,\n  \"detalles_orden\": [\"Paquete de prueba\"]\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Entregas",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/entregas?page=1&limit=50", "host": ["{{base_url}}"], "path": ["api", "logistica", "entregas"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "50" }] }
+      },
+      "response": []
+    },
+    {
+      "name": "Detalle Entrega",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}", "host": ["{{base_url}}"], "path": ["api", "logistica", "entregas", "{{entrega_id}}"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Feed Disponible",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/feed/disponibles", "host": ["{{base_url}}"], "path": ["api", "logistica", "feed", "disponibles"] },
+        "description": "Broker puede usar este endpoint para observar pedidos pendientes mientras WebSocket no esta implementado."
+      },
+      "response": []
+    },
+    {
+      "name": "Repartidores Disponibles Simulados",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/repartidores/disponibles", "host": ["{{base_url}}"], "path": ["api", "logistica", "repartidores", "disponibles"] },
+        "description": "Temporal hasta integrar Administracion."
+      },
+      "response": []
+    },
+    {
+      "name": "Aceptar Entrega Como Repartidor",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": { "raw": "{{base_url}}/api/logistica/feed/{{entrega_id}}/aceptar", "host": ["{{base_url}}"], "path": ["api", "logistica", "feed", "{{entrega_id}}", "aceptar"] },
+        "body": { "mode": "raw", "raw": "{\n  \"repartidor_id\": {{repartidor_id}}\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "Cambiar Estado Generico",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "1" }, { "key": "x-user-role", "value": "admin" }],
+        "url": { "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}/estado", "host": ["{{base_url}}"], "path": ["api", "logistica", "entregas", "{{entrega_id}}", "estado"] },
+        "description": "Estados validos: pendiente, asignada, en_ruta, entregada, fallida, cancelada.",
+        "body": { "mode": "raw", "raw": "{\n  \"estado\": \"en_ruta\",\n  \"comentario\": \"Cambio disparado por Broker/Admin\"\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "Historial Entrega",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}/historial", "host": ["{{base_url}}"], "path": ["api", "logistica", "entregas", "{{entrega_id}}", "historial"] }
+      },
+      "response": []
+    },
+    {
+      "name": "Notificaciones",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/notificaciones?entrega_id={{entrega_id}}", "host": ["{{base_url}}"], "path": ["api", "logistica", "notificaciones"], "query": [{ "key": "entrega_id", "value": "{{entrega_id}}" }] }
+      },
+      "response": [] 
+    },
+    {
+      "name": "Estadisticas Generales",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/estadisticas/generales", "host": ["{{base_url}}"], "path": ["api", "logistica", "estadisticas", "generales"] }
+      },
+      "response": []
+    }
+  ]
+}
