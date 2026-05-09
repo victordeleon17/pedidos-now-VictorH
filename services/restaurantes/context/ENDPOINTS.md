@@ -161,6 +161,25 @@ Actualizar estado de un pedido
 - **Body**: `{ estado }`
 - **Response**: Pedido actualizado
 
+### GET `/restaurantes/:restaurante_id/pedidos/:pedido_id/logistica`
+Obtener payload logistico completo para crear entrega
+- **Auth**: No requerida actualmente
+- **Response**: Pedido con datos del negocio, destino, monto, categoria `FOOD` y detalles de orden
+
+### PATCH `/restaurantes/:restaurante_id/pedidos/:pedido_id/logistica-status`
+Recibir cambios de estado desde Logistica
+- **Auth**: No requerida actualmente
+- **Body**: `{ entrega_id?, estado_logistica, evento?, repartidor_id?, comentario?, timestamp? }`
+- **Estados soportados**: `pendiente`, `asignada`, `en_ruta`, `entregada`, `cancelada`, `fallida`
+- **Response**: Estado interno actualizado y registro de historial
+
+### PUT `/restaurantes/:restaurante_id/pedidos/:pedido_id/estado`
+Actualizar estado del pedido usando el contrato compatible con la coleccion actual
+- **Auth**: No requerida actualmente
+- **Body**: `{ estado_id, motivo?, metadata? }`
+- **Metadata soportada**: `{ entrega_id?, estado_logistica?, repartidor_id?, timestamp? }`
+- **Response**: Estado actualizado y metadata recibida
+
 ---
 
 ## 🔐 Autenticación

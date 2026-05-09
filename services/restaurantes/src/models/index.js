@@ -306,6 +306,15 @@ HistorialEstadosPedido.belongsTo(Pedido, {
   as: 'pedido' 
 });
 
+EstadoPedido.hasMany(HistorialEstadosPedido, {
+  foreignKey: 'estado_id',
+  as: 'historial_estados'
+});
+HistorialEstadosPedido.belongsTo(EstadoPedido, {
+  foreignKey: 'estado_id',
+  as: 'estado'
+});
+
 // Pedido <-> CancelacionPedido (1:1)
 Pedido.hasOne(CancelacionPedido, { 
   foreignKey: 'pedido_id', 
