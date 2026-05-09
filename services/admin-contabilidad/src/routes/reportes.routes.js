@@ -1,19 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const controller = require('../controller/reportes.controller');
+const { validarToken } = require('../middleware/auth');
 
 console.log("CONTROLLER:", controller);
 
-router.get('/pagos-por-fecha', controller.getPagosPorFecha);
-router.get('/ventas', controller.getVentas);
-router.get('/pedidos', controller.getPedidos);
-router.get('/propinas', controller.getPropinas);
-router.get('/costos', controller.getCostos);
-router.get('/crecimiento', controller.getCrecimiento);
-router.get('/chats', controller.getChats);
-router.get('/usuarios', controller.getUsuarios);
-router.get('/pedidos-externos', controller.getPedidosExternos);
-router.get('/estadisticas-entidad', controller.getEstadisticasPorEntidad);
-router.get('/reembolsos-compensaciones', controller.getReembolsosYCompensaciones);
+//Rutas que requieren autenticación
+router.get('/ventas', validarToken, controller.getReporteVentas);
+router.get('/pedidos', validarToken, controller.getReportePedidos);
+router.get('/crecimiento', validarToken, controller.getReporteCrecimiento);
+router.get('/costos', validarToken, controller.getReporteCostos);
 
 module.exports = router;

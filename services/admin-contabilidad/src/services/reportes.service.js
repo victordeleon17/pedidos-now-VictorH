@@ -1,4 +1,5 @@
 const reportesRepo = require('../repositories/reportes.repository');
+const cobrosService = require('./cobros.service');
 
 const getPagosPorFecha = (inicio, fin) => {
     return reportesRepo.getPagosPorFecha(inicio, fin);
@@ -83,6 +84,21 @@ const getReembolsosYCompensaciones = (inicio, fin) => {
     return reportesRepo.getReembolsosYCompensaciones(inicio, fin);
 };
 
+const getVentasConCobros = async (inicio, fin) => {
+    // Obtengo datos locales
+    const ventasLocales = await reportesRepo.getVentas(inicio, fin);
+    
+    // Obtengo datos de cobros (para validar)
+    const cobros = await cobrosService.obtenerCobros(inicio, fin);
+    
+    // Concilio: ¿coinciden?
+    return {
+        ventas_locales: ventasLocales,
+        cobros_externos: cobros,
+        conciliado: ventasLocales.total === cobros.total
+    };
+};
+
 module.exports = {
     getPagosPorFecha,
     getVentas,
@@ -94,5 +110,6 @@ module.exports = {
     getUsuarios,
     getPedidosExternos,
     getEstadisticasPorEntidad,
-    getReembolsosYCompensaciones
+    getReembolsosYCompensaciones,
+    getVentasConCobros
 };

@@ -3,12 +3,14 @@ const router = express.Router();
 const controller = require('../controller/movimiento.controller');
 const {validarMonto} = require('../middleware/validar');
 
+// Rutas públicas
 router.get('/', controller.getAllMovimientos);
-router.get('/fondos', controller.getFondos);
-router.get('/fondo-reembolsos', controller.getFondoReembolsos);
-router.post('/fondo-reembolsos', controller.recargarFondo);
-router.post('/egreso', validarMonto, controller.egreso);
-router.post('/ingreso-pedido', validarMonto, controller.ingresoPedido);
+router.get('/:id', controller.getMovimientoById);
+
+// Rutas protegidas
+router.post('/', validarToken, controller.crearMovimiento);
+router.put('/:id', validarToken, controller.updateMovimiento);
+router.delete('/:id', validarToken, controller.deleteMovimiento);
 
 router.get('/test', (req, res) => {
     res.send('Movimiento OK');

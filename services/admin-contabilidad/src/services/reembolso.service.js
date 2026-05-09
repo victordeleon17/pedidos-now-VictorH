@@ -1,9 +1,24 @@
 const db = require('../config/db')
 const repo = require('../repositories/reembolso.repository');
 const movRepo = require('../repositories/movimiento.repository');
+const bancarioService = require('./sistema-bancario.service');
 
 const registrarReembolso = async (data) => {
     const conn = await db.getConnection();
+
+    const transferencia = await bancarioService.transferencia({
+        cuenta_origen: 1, // Cuenta de reembolsos
+        cuenta_destino: data.cliente_cuenta_bancaria,
+        monto: data.monto,
+        concepto: 'Reembolso por cancelación'
+    });
+    
+    const reembolsoId = await repo.crearReembolso(data);
+    
+    return {
+        reembolso_id: reembolsoId,
+        transferencia_id: transferencia.id
+    };
 
     try {
         await conn.beginTransaction();
