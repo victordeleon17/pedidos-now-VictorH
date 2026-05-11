@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const sequelize = require("../db");
+const db = require("../db");
 
 router.get("/health", async (req, res) => {
   try {
-    await sequelize.authenticate();
+    const connection = await db.getConnection();
+    await connection.ping();
+    connection.release();
+
     return res.json({
       ok: true,
       service: "cobros",
