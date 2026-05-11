@@ -1,12 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
+const { sequelize } = require("../../models");
 
 router.get("/health", async (req, res) => {
   try {
-    const connection = await db.getConnection();
-    await connection.ping();
-    connection.release();
+    await sequelize.authenticate();
 
     return res.json({
       ok: true,
