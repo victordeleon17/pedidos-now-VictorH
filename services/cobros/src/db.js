@@ -11,7 +11,15 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  ssl: usaSsl ? { minVersion: "TLSv1.2" } : undefined
+  ssl: usaSsl
+    ? {
+        minVersion: "TLSv1.2",
+        rejectUnauthorized: true,
+        ca: process.env.DB_CA
+          ? process.env.DB_CA.replace(/\\n/g, "\n")
+          : undefined
+      }
+    : undefined
 });
 
 module.exports = pool;
