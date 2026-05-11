@@ -5,15 +5,18 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 
-const { sequelize } = require('./src/models');
 
-const testRoutes = require('./src/routes/test.routes');
-const pagosAgentesRoutes = require('./src/routes/pagos_agentes.routes');
-const reportesRoutes = require('./src/routes/reportes.routes');
-const dashboardRoutes = require('./src/routes/dashboard.routes');
-const movimientoRoutes = require('./src/routes/movimiento.routes');
-const reembolsoRoutes = require('./src/routes/reembolso.routes');
-const compensacionRoutes = require('./src/routes/compensacion.routes');
+// Admin-contabilidad Emmanuel
+const { sequelize } = require('./config/db');
+
+
+const testRoutes = require('./routes/test.routes');
+const pagosAgentesRoutes = require('./routes/pagos_agentes.routes');
+const reportesRoutes = require('./routes/reportes.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
+const movimientoRoutes = require('./routes/movimiento.routes');
+const reembolsoRoutes = require('./routes/reembolso.routes');
+const compensacionRoutes = require('./routes/compensacion.routes');
 
 // Admin-contabilidad Emmanuel
 const reportesRestaurantesRoutes = require('./routes/reportesRestaurantes.routes');
@@ -27,6 +30,7 @@ app.use(cors({
   origin: process.env.BROKER_URL || 'http://localhost:5000',
   credentials: true
 }));
+
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(compression());

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controller/movimiento.controller');
+const controller = require('../controllers/movimiento.controller');
 const {validarMonto} = require('../middleware/validar');
 
 // Rutas públicas

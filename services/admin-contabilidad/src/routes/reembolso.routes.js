@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controller/reembolso.controller');
+const controller = require('../controllers/reembolso.controller');
 const { validarToken } = require('../middleware/auth');
 
 // Rutas públicas

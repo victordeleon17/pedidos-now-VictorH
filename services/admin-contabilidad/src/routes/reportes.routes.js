@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controller/reportes.controller');
+const controller = require('../controllers/reportes.controller');
 const { validarToken } = require('../middleware/auth');
 
 console.log("CONTROLLER:", controller);

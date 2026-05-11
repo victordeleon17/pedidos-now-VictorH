@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controller/pagos_agentes.controller');
+const controller = require('../controllers/pagos_agentes.controller');
 
 console.log(controller);
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controller/dashboard.controller');
+const controller = require('../controllers/dashboard.controller');
 
 router.get('/', controller.getDashboard);
 
