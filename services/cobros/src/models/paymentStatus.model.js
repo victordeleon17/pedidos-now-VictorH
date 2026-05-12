@@ -10,7 +10,7 @@ async function findByCode(code, executor = db) {
 
 async function findAllActive(executor = db) {
   const [rows] = await executor.query(
-    "SELECT id, code, description FROM payment_statuses WHERE is_active = 1 ORDER BY code"
+    "SELECT id, code, description FROM payment_statuses WHERE is_active = true ORDER BY code"
   );
   return rows;
 }

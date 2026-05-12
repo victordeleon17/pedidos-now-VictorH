@@ -19,7 +19,7 @@ Esto corre migraciones, seeders idempotentes y luego inicia la API.
 
 ## Variables requeridas
 
-Usar `.env.example` como base. La base objetivo del ORM es `payments_orm_db`.
+Usar `.env.example` como base. La base objetivo del ORM es `cobrosdb` en PostgreSQL/Neon.
 
 ## Opciones gratuitas de despliegue
 

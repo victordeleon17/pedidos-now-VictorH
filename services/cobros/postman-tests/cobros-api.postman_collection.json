@@ -2,11 +2,28 @@
   "info": {
     "_postman_id": "55d6e5b7-1ad9-4551-944b-c4eb4f78ef7c",
     "name": "cobros-api",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "53355151",
-    "_collection_link": "https://go.postman.co/collection/53355151-55d6e5b7-1ad9-4551-944b-c4eb4f78ef7c?source=collection_link"
+    "description": "Coleccion actualizada para Cobros API desplegada en Fly.io y conectada a Neon/PostgreSQL.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Healthcheck",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
     {
       "name": "Payments",
       "item": [
@@ -14,108 +31,110 @@
           "name": "Calculate total",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"items\": [\r\n    {\r\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\r\n      \"product_name\": \"Hamburguesa\",\r\n      \"quantity\": 2,\r\n      \"unit_price\": 40,\r\n      \"item_discount\": 0,\r\n      \"is_combo\": false\r\n    },\r\n    {\r\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\r\n      \"product_name\": \"Papas\",\r\n      \"quantity\": 1,\r\n      \"unit_price\": 15,\r\n      \"item_discount\": 0,\r\n      \"is_combo\": false\r\n    }\r\n  ],\r\n  \"product_discounts\": 0,\r\n  \"coupon_discount\": 0,\r\n  \"service_fee\": 5,\r\n  \"tip_amount\": 10\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    },\n    {\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\n      \"product_name\": \"Papas\",\n      \"quantity\": 1,\n      \"unit_price\": 15,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/api/payments/calculate",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments",
-                "calculate"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "calculate"]
             }
           },
           "response": []
         },
         {
-          "name": "Create payment - CARD",
+          "name": "Create payment - CARD_CREDIT",
           "event": [
-            {
-              "listen": "prerequest",
-              "script": {
-                "exec": [
-                  ""
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            },
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "try {\r",
-                  "  const json = pm.response.json();\r",
-                  "  const result = json.result || {};\r",
-                  "\r",
-                  "  if (result.payment_id) pm.collectionVariables.set(\"paymentId\", result.payment_id);\r",
-                  "  if (result.order_snapshot_id) pm.collectionVariables.set(\"orderSnapshotId\", result.order_snapshot_id);\r",
-                  "  if (result.reservation_id) pm.collectionVariables.set(\"reservationId\", result.reservation_id);\r",
-                  "} catch (e) {}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const result = json.result || {};",
+                  "if (result.payment_id) pm.collectionVariables.set('paymentId', result.payment_id);",
+                  "if (result.order_snapshot_id) pm.collectionVariables.set('orderSnapshotId', result.order_snapshot_id);",
+                  "if (result.reservation_id) pm.collectionVariables.set('reservationId', result.reservation_id);"
+                ]
               }
             }
           ],
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"customer_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\r\n  \"courier_id\": \"{{courierId}}\",\r\n  \"business_id\": \"cccccccc-cccc-cccc-cccc-cccccccccccc\",\r\n  \"delivery_address_id\": \"dddddddd-dddd-dddd-dddd-dddddddddddd\",\r\n  \"reservation_id\": \"RES-10003\",\r\n  \"currency_code\": \"GTQ\",\r\n  \"payment_method_code\": \"CARD_CREDIT\",\r\n  \"product_discounts\": 0,\r\n  \"coupon_discount\": 0,\r\n  \"service_fee\": 5,\r\n  \"courier_earned_fee\": 15,\r\n  \"approved_extra_fee\": 0,\r\n  \"tip_amount\": 10,\r\n  \"items\": [\r\n    {\r\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\r\n      \"external_product_id\": \"PROD-10\",\r\n      \"product_name\": \"Hamburguesa\",\r\n      \"quantity\": 2,\r\n      \"unit_price\": 40,\r\n      \"item_discount\": 0,\r\n      \"is_combo\": false\r\n    },\r\n    {\r\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\r\n      \"external_product_id\": \"PROD-11\",\r\n      \"product_name\": \"Papas\",\r\n      \"quantity\": 1,\r\n      \"unit_price\": 15,\r\n      \"item_discount\": 0,\r\n      \"is_combo\": false\r\n    }\r\n  ],\r\n  \"idempotency_key\": \"idem-card-{{timestamp}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"customer_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"cccccccc-cccc-cccc-cccc-cccccccccccc\",\n  \"delivery_address_id\": \"dddddddd-dddd-dddd-dddd-dddddddddddd\",\n  \"reservation_id\": \"RES-CARD-{{timestamp}}\",\n  \"order_id\": \"ORD-CARD-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"CARD_CREDIT\",\n  \"card_type\": \"CREDIT\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"items\": [\n    {\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\n      \"external_product_id\": \"PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    },\n    {\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\n      \"external_product_id\": \"PROD-11\",\n      \"product_name\": \"Papas\",\n      \"quantity\": 1,\n      \"unit_price\": 15,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"idem-card-{{timestamp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/api/payments",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
             }
           },
           "response": []
         },
         {
-          "name": "List by reservation",
+          "name": "Create payment - CASH",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const result = json.result || {};",
+                  "if (result.payment_id) pm.collectionVariables.set('paymentId', result.payment_id);",
+                  "if (result.order_snapshot_id) pm.collectionVariables.set('orderSnapshotId', result.order_snapshot_id);",
+                  "if (result.reservation_id) pm.collectionVariables.set('reservationId', result.reservation_id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"cccccccc-cccc-cccc-cccc-cccccccccccc\",\n  \"delivery_address_id\": \"dddddddd-dddd-dddd-dddd-dddddddddddd\",\n  \"reservation_id\": \"RES-CASH-{{timestamp}}\",\n  \"order_id\": \"ORD-CASH-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"CASH\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"items\": [\n    {\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\n      \"external_product_id\": \"PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"idem-cash-{{timestamp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments?courierId={{courierId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [{ "key": "courierId", "value": "{{courierId}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List payments by reservation",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/payments?reservationId={{reservationId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments"
-              ],
-              "query": [
-                {
-                  "key": "reservationId",
-                  "value": "{{reservationId}}"
-                }
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"],
+              "query": [{ "key": "reservationId", "value": "{{reservationId}}" }]
             }
           },
           "response": []
@@ -127,109 +146,44 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments",
-                "{{paymentId}}"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}"]
             }
           },
           "response": []
         },
         {
-          "name": "List by orderSnapshotId",
+          "name": "Cancel payment",
           "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/payments?orderSnapshotId={{orderSnapshotId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments"
-              ],
-              "query": [
-                {
-                  "key": "orderSnapshotId",
-                  "value": "{{orderSnapshotId}}"
-                }
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Create payment - CASH",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "try {\r",
-                  "  const json = pm.response.json();\r",
-                  "  const result = json.result || {};\r",
-                  "\r",
-                  "  if (result.payment_id) pm.collectionVariables.set(\"paymentId\", result.payment_id);\r",
-                  "  if (result.order_snapshot_id) pm.collectionVariables.set(\"orderSnapshotId\", result.order_snapshot_id);\r",
-                  "  if (result.reservation_id) pm.collectionVariables.set(\"reservationId\", result.reservation_id);\r",
-                  "} catch (e) {}"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"customer_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\r\n  \"courier_id\": \"{{courierId}}\",\r\n  \"business_id\": \"cccccccc-cccc-cccc-cccc-cccccccccccc\",\r\n  \"delivery_address_id\": \"dddddddd-dddd-dddd-dddd-dddddddddddd\",\r\n  \"reservation_id\": \"RES-10002\",\r\n  \"currency_code\": \"GTQ\",\r\n  \"payment_method_code\": \"CASH\",\r\n  \"product_discounts\": 0,\r\n  \"coupon_discount\": 0,\r\n  \"service_fee\": 5,\r\n  \"courier_earned_fee\": 15,\r\n  \"approved_extra_fee\": 0,\r\n  \"tip_amount\": 10,\r\n  \"items\": [\r\n    {\r\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\r\n      \"external_product_id\": \"PROD-10\",\r\n      \"product_name\": \"Hamburguesa\",\r\n      \"quantity\": 2,\r\n      \"unit_price\": 40,\r\n      \"item_discount\": 0,\r\n      \"is_combo\": false\r\n    },\r\n    {\r\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\r\n      \"external_product_id\": \"PROD-11\",\r\n      \"product_name\": \"Papas\",\r\n      \"quantity\": 1,\r\n      \"unit_price\": 15,\r\n      \"item_discount\": 0,\r\n      \"is_combo\": false\r\n    }\r\n  ],\r\n  \"idempotency_key\": \"idem-card-{{timestamp}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"reason\": \"Cancelled from Postman\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/payments",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments"
-              ]
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "cancel"]
             }
           },
           "response": []
         },
         {
-          "name": "List payments by courierId",
+          "name": "Refund payment",
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10,\n  \"reason\": \"Refund from Postman\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
             "url": {
-              "raw": "{{baseUrl}}/api/payments?courierId={{courierId}}",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "payments"
-              ],
-              "query": [
-                {
-                  "key": "courierId",
-                  "value": "{{courierId}}"
-                }
-              ]
+              "raw": "{{baseUrl}}/api/payments/{{paymentId}}/refund",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "{{paymentId}}", "refund"]
             }
           },
           "response": []
@@ -245,24 +199,14 @@
             {
               "listen": "test",
               "script": {
-                "exec": [
-                  "try {\r",
-                  "  const json = pm.response.json();\r",
-                  "  const txs = json.result?.transactions || json.transactions || [];\r",
-                  "\r",
-                  "  const pendingCash = txs.find(\r",
-                  "    t => t.paymentMethod === \"CASH\" && t.isDebtSettled === false\r",
-                  "  );\r",
-                  "\r",
-                  "  if (pendingCash) {\r",
-                  "    if (pendingCash.transactionId) pm.collectionVariables.set(\"cashDebtTransactionId\", pendingCash.transactionId);\r",
-                  "    if (pendingCash.orderId) pm.collectionVariables.set(\"cashDebtOrderId\", pendingCash.orderId);\r",
-                  "  }\r",
-                  "} catch (e) {}"
-                ],
                 "type": "text/javascript",
-                "packages": {},
-                "requests": {}
+                "exec": [
+                  "const json = pm.response.json();",
+                  "const txs = json.result?.transactions || [];",
+                  "const pendingCash = txs.find(t => t.paymentMethod === 'CASH' && t.isDebtSettled === false);",
+                  "if (pendingCash?.transactionId) pm.collectionVariables.set('cashDebtTransactionId', pendingCash.transactionId);",
+                  "if (pendingCash?.orderId) pm.collectionVariables.set('cashDebtOrderId', pendingCash.orderId);"
+                ]
               }
             }
           ],
@@ -270,28 +214,27 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/api/wallet/summary?courierId={{courierId}}&startDate=2026-03-01&endDate=2026-03-31",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "wallet",
-                "summary"
-              ],
+              "raw": "{{baseUrl}}/api/wallet/summary?courierId={{courierId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "summary"],
+              "query": [{ "key": "courierId", "value": "{{courierId}}" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get wallet summary by date range",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/wallet/summary?courierId={{courierId}}&startDate=2026-01-01&endDate=2026-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "summary"],
               "query": [
-                {
-                  "key": "courierId",
-                  "value": "{{courierId}}"
-                },
-                {
-                  "key": "startDate",
-                  "value": "2026-03-01"
-                },
-                {
-                  "key": "endDate",
-                  "value": "2026-03-31"
-                }
+                { "key": "courierId", "value": "{{courierId}}" },
+                { "key": "startDate", "value": "2026-01-01" },
+                { "key": "endDate", "value": "2026-12-31" }
               ]
             }
           },
@@ -301,26 +244,16 @@
           "name": "Pay pending by transactionId",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"courierId\": \"{{courierId}}\",\r\n  \"transactionId\": \"{{cashDebtTransactionId}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"transactionId\": \"{{cashDebtTransactionId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/api/wallet/pay-pending",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "wallet",
-                "pay-pending"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "pay-pending"]
             }
           },
           "response": []
@@ -329,49 +262,21 @@
           "name": "Pay pending by orderId",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"courierId\": \"{{courierId}}\",\r\n  \"orderId\": \"{{cashDebtOrderId}}\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"orderId\": \"{{cashDebtOrderId}}\"\n}",
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/api/wallet/pay-pending",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "wallet",
-                "pay-pending"
-              ]
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "wallet", "pay-pending"]
             }
           },
           "response": []
         }
       ]
-    },
-    {
-      "name": "Health",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/health",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            "api",
-            "health"
-          ]
-        }
-      },
-      "response": []
     }
   ],
   "event": [
@@ -379,10 +284,8 @@
       "listen": "prerequest",
       "script": {
         "type": "text/javascript",
-        "packages": {},
-        "requests": {},
         "exec": [
-          ""
+          "pm.collectionVariables.set('timestamp', Date.now());"
         ]
       }
     },
@@ -390,26 +293,18 @@
       "listen": "test",
       "script": {
         "type": "text/javascript",
-        "packages": {},
-        "requests": {},
-        "exec": [
-          ""
-        ]
+        "exec": []
       }
     }
   ],
   "variable": [
-    {
-      "key": "baseUrl",
-      "value": ""
-    },
-    {
-      "key": "paymentId",
-      "value": ""
-    },
-    {
-      "key": "orderSnapshotId",
-      "value": ""
-    }
+    { "key": "baseUrl", "value": "https://cobros-api.fly.dev" },
+    { "key": "courierId", "value": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" },
+    { "key": "paymentId", "value": "" },
+    { "key": "orderSnapshotId", "value": "" },
+    { "key": "reservationId", "value": "" },
+    { "key": "cashDebtTransactionId", "value": "" },
+    { "key": "cashDebtOrderId", "value": "" },
+    { "key": "timestamp", "value": "" }
   ]
 }

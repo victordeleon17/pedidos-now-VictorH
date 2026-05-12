@@ -47,7 +47,7 @@ package-lock.json       # Lock de dependencias
 
 🛠️ Tecnologías
 Node.js + Express
-MySQL + mysql2
+PostgreSQL + pg
 dotenv
 Postman para pruebas de endpoints
 

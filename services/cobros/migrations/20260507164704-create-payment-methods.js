@@ -5,7 +5,7 @@ module.exports = {
     await queryInterface.createTable('payment_methods', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('(UUID())'),
+        defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true
       },

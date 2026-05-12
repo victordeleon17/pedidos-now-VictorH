@@ -12,9 +12,9 @@ module.exports = {
         ('aaaaaaaa-5555-5555-5555-555555555555', 'CANCELLED', 'Payment was cancelled', true, NOW(), NOW()),
         ('aaaaaaaa-6666-6666-6666-666666666666', 'PARTIALLY_REFUNDED', 'Payment was partially refunded', true, NOW(), NOW()),
         ('aaaaaaaa-7777-7777-7777-777777777777', 'REFUNDED', 'Payment was fully refunded', true, NOW(), NOW())
-      ON DUPLICATE KEY UPDATE
-        description = VALUES(description),
-        is_active = VALUES(is_active),
+      ON CONFLICT (code) DO UPDATE SET
+        description = EXCLUDED.description,
+        is_active = EXCLUDED.is_active,
         updated_at = NOW();
     `);
   },

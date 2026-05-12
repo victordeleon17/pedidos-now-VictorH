@@ -5,7 +5,7 @@ module.exports = {
     await queryInterface.createTable('courier_wallets', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('(UUID())'),
+        defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true
       },

@@ -5,7 +5,7 @@ module.exports = {
     await queryInterface.createTable('orders_snapshot', {
       id: {
         type: Sequelize.UUID,
-        defaultValue: Sequelize.literal('(UUID())'),
+        defaultValue: Sequelize.UUIDV4,
         allowNull: false,
         primaryKey: true
       },

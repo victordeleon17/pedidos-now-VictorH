@@ -6,7 +6,7 @@ async function findActiveByCode(code, executor = db) {
             max_discount_amount, max_uses, current_uses, start_date, end_date, is_active
      FROM coupons
      WHERE code = ?
-       AND is_active = 1
+       AND is_active = true
        AND NOW() BETWEEN start_date AND end_date
      LIMIT 1`,
     [code]
