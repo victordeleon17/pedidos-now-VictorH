@@ -1,133 +1,177 @@
-const service = require('../services/movimiento.service');
-const repo = require('../repositories/movimiento.repository');
+const movimientoRepository = require('../repositories/movimiento.repository');
 
-const getAllMovimientos = async (req, res) => {
+const getAllMovimientos = async (req, res, next) => {
     try {
-        const movimiento = await repo.getAllMovimientos();
+        const movimientos = await movimientoRepository.getAllMovimientos();
+
         res.json({
             ok: true,
-            data: movimiento,
-            count: movimiento.length
+            data: movimientos,
+            count: movimientos.length
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            ok: false,
-            error: 'Error al obtener movimientos',
-            detalle: error.message
-        });
+        next(error);
     }
 };
 
-const ingresoPedido = async (req, res) => {
+const getMovimientoById = async (req, res, next) => {
     try {
-        const data = req.body;
+        const { id } = req.params;
 
-        if (!data || !data.pedido_id || !data.monto || data.monto <= 0) {
-            return res.status(400).json({
-                error: 'Faltan datos o monto inválido'
+        const movimiento = await movimientoRepository.getMovimientoById(id);
+
+        if (!movimiento) {
+            return res.status(404).json({
+                ok: false,
+                message: 'Movimiento no encontrado'
             });
         }
 
-        const result = await service.registrarIngresoPedido(data);
-
-        res.json(result);
-    } catch (error) {
-        console.error(error);        
-        res.status(500).json({
-            ok: false,
-            error:'Error al registrar ingreso'
+        res.json({
+            ok: true,
+            data: movimiento
         });
+    } catch (error) {
+        next(error);
     }
 };
 
-const egreso = async (req, res) => {
+const crearMovimiento = async (req, res, next) => {
     try {
-        const data = req.body;
+        const nuevoMovimiento = await movimientoRepository.crearMovimiento(req.body);
 
-        const result = await service.registrarEgreso(data);
+        res.status(201).json({
+            ok: true,
+            message: 'Movimiento creado correctamente',
+            data: nuevoMovimiento
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const updateMovimiento = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const movimientoActualizado = await movimientoRepository.updateMovimiento(id, req.body);
+
+        if (!movimientoActualizado) {
+            return res.status(404).json({
+                ok: false,
+                message: 'Movimiento no encontrado'
+            });
+        }
 
         res.json({
             ok: true,
-            data: result
+            message: 'Movimiento actualizado correctamente',
+            data: movimientoActualizado
         });
     } catch (error) {
-        console.error(error);        
-        res.status(500).json({
-            ok: false,
-            error: 'Error al registrar egreso'
-        });
+        next(error);
     }
 };
 
-const getFondos = async (req, res) => {
+const deleteMovimiento = async (req, res, next) => {
     try {
-        const fondos = await service.obtenerFondos();
+        const { id } = req.params;
+
+        const eliminado = await movimientoRepository.deleteMovimiento(id);
+
+        if (!eliminado) {
+            return res.status(404).json({
+                ok: false,
+                message: 'Movimiento no encontrado'
+            });
+        }
+
+        res.json({
+            ok: true,
+            message: 'Movimiento eliminado correctamente'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const ingresoPedido = async (req, res, next) => {
+    try {
+        const movimiento = await movimientoRepository.ingresoPedido(req.body);
+
+        res.status(201).json({
+            ok: true,
+            message: 'Ingreso por pedido registrado correctamente',
+            data: movimiento
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const egreso = async (req, res, next) => {
+    try {
+        const movimiento = await movimientoRepository.egreso(req.body);
+
+        res.status(201).json({
+            ok: true,
+            message: 'Egreso registrado correctamente',
+            data: movimiento
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getFondos = async (req, res, next) => {
+    try {
+        const fondos = await movimientoRepository.getFondos();
+
         res.json({
             ok: true,
             data: fondos
         });
     } catch (error) {
-        console.error(error);        
-        res.status(500).json({
-            ok: false,
-            error:'Error obteniendo fondos'
-        });
+        next(error);
     }
 };
 
-const getFondoReembolsos = async (req, res) => {
+const getFondoReembolsos = async (req, res, next) => {
     try {
-        const fondos = await service.obtenerFondos();
-        const fondo = fondos.find(f => f.id === 2);
+        const fondo = await movimientoRepository.getFondoReembolsos();
+
         res.json({
             ok: true,
             data: fondo
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({
-            ok: false,
-            error: 'Error obtenido fondo'
-        });
+        next(error);
     }
 };
 
-const recargarFondo = async (req, res) => {
+const recargarFondo = async (req, res, next) => {
     try {
-        const {monto} = req.body;
-        if (!monto || monto <= 0){
-            return res.status(400).json({
-                ok: false,
-                error:'Monto inválido'
-            });
-        }
-        const cuenta_id = 2;
-        await service.registrarIngresoPedido({
-            pedido_id: 0,
-            monto,
-            subtipo: 'fondo',
-            modulo_origen: 'reembolso',
-            descripcion: 'Recarga fondo reembolsos'
-        });
-        res.json({
-            ok: true, 
-            mensaje: 'Fondo recargado'
+        const fondo = await movimientoRepository.recargarFondo(req.body);
+
+        res.status(201).json({
+            ok: true,
+            message: 'Fondo de reembolsos recargado correctamente',
+            data: fondo
         });
     } catch (error) {
-        console.error(error);        
-        res.status(500).json({
-            ok: false,
-            error: 'Error recargando fondo'
-        });
+        next(error);
     }
 };
 
 module.exports = {
+    getAllMovimientos,
+    getMovimientoById,
+    crearMovimiento,
+    updateMovimiento,
+    deleteMovimiento,
     ingresoPedido,
     egreso,
     getFondos,
     getFondoReembolsos,
-    recargarFondo,
-    getAllMovimientos
-}
+    recargarFondo
+};
