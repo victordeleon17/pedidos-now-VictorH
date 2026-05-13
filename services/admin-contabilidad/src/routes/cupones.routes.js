@@ -14,8 +14,9 @@ const {
 // =========================
 // ADMIN - CUPONES LEALTAD
 // =========================
+///////
 router.post(
-  '/admin/cupones/lealtad',
+  '/api/cupones/lealtad',
   crearCuponLealtad
 );
 
@@ -24,7 +25,7 @@ router.post(
 // ADMIN - ACTIVAR CUPON
 // =========================
 router.patch(
-  '/admin/cupones/:id/activar',
+  '/api/cupones/:id/activar',
   activarCupon
 );
 
@@ -32,7 +33,7 @@ router.patch(
 // ADMIN - CANCELAR CUPON
 // =========================
 router.patch(
-  '/admin/cupones/:id/cancelar',
+  '/api/cupones/:id/cancelar',
   cancelarCupon
 );
 
@@ -40,7 +41,7 @@ router.patch(
 // ADMIN - VENCER CUPONES
 // =========================
 router.patch(
-  '/admin/cupones/vencer',
+  '/api/cupones/vencer',
   vencerCupones
 );
 
@@ -48,7 +49,7 @@ router.patch(
 // ADMIN - CUPON POR CODIGO
 // =========================
 router.get(
-  '/admin/cupones/codigo/:codigo',
+  '/api/cupones/codigo/:codigo',
   getCuponByCodigo
 );
 
@@ -57,7 +58,7 @@ router.get(
 // ADMIN - CUPON POR ID
 // =========================
 router.get(
-  '/admin/cupones/:id',
+  '/api/cupones/:id',
   getCuponById
 );
 

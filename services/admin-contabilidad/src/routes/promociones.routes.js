@@ -15,16 +15,16 @@ const {
 } = require('../controllers/promociones.controller');
 
 // POST
-router.post('/admin/promociones/reportes', syncPromociones);
+router.post('/api/promociones/reportes', syncPromociones);
 
 // GET
-router.get('/admin/promociones/reportes', getReportes);
+router.get('/api/promociones/reportes', getReportes);
 
 // =========================
 // ADMIN - PROMOCION FLASH
 // =========================
 router.post(
-  '/admin/promociones/flash',
+  '/api/promociones-flash',
   crearPromocionFlash
 );
 
@@ -32,7 +32,7 @@ router.post(
 // GET - PROMOCIONES FLASH
 // =========================
 router.get(
-  '/admin/promociones/flash',
+  '/api/promociones-flash',
   getPromocionesFlash
 );
 
@@ -40,7 +40,7 @@ router.get(
 // ADMIN - GET PROMOCION FLASH POR ID
 // =========================
 router.get(
-  '/admin/promociones/flash/:id',
+  '/api/promociones-flash/:id',
   getPromocionFlashById
 );
 
@@ -48,7 +48,7 @@ router.get(
 // GET - PROMOCIONES FLASH VIGENTES
 // =========================
 router.get(
-  '/admin/promociones/flash/vigentes',
+  '/api/promociones-flash/vigentes',
   getPromocionesFlashVigentes
 );
 
@@ -56,7 +56,7 @@ router.get(
 // ADMIN - GET PROMOCIONES
 // =========================
 router.get(
-  '/admin/promociones',
+  '/api/promociones',
   getPromociones
 );
 
@@ -64,7 +64,7 @@ router.get(
 // ADMIN - CAMBIAR ESTADO PROMOCION
 // =========================
 router.patch(
-  '/admin/promociones/:id/estado',
+  '/api/promociones/:id/estado',
   cambiarEstadoPromocion
 );
 
@@ -72,7 +72,7 @@ router.patch(
 // ADMIN - GET PROMOCION POR ID
 // =========================
 router.get(
-  '/admin/promociones/:id',
+  '/api/promociones/:id',
   getPromocionById
 );
 
