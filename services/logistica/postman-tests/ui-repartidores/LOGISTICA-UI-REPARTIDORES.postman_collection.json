@@ -1,0 +1,200 @@
+{
+  "info": {
+    "name": "Logistica - UI Repartidores",
+    "_postman_id": "logistica-ui-repartidores-04052026",
+    "description": "Coleccion para simular manualmente el flujo que consumira la UI de Repartidores. Por ahora auth, roles y repartidores son simulados en archivos locales. WebSocket esta pendiente; mientras tanto la UI puede usar polling sobre el feed y endpoints REST para cambios de estado.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3005", "type": "string" },
+    { "key": "repartidor_id", "value": "101", "type": "string" },
+    { "key": "entrega_id", "value": "4", "type": "string" },
+    { "key": "restaurante_id", "value": "1", "type": "string" },
+    { "key": "pedido_id", "value": "2", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "00 - Health Logistica",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/health", "host": ["{{base_url}}"], "path": ["health"] },
+        "description": "Confirma que Logistica este corriendo."
+      },
+      "response": []
+    },
+    {
+      "name": "01 - Crear Entrega De Prueba Desde Restaurante",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/entregas/restaurantes/{{restaurante_id}}/pedidos/{{pedido_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "entregas", "restaurantes", "{{restaurante_id}}", "pedidos", "{{pedido_id}}"]
+        },
+        "description": "Crea una entrega pendiente para que aparezca en el feed. En produccion esto lo haria Restaurantes/Negocios, no la UI de repartidor.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente_nombre\": \"Cliente UI Repartidor\",\n  \"cliente_telefono\": \"5555-1111\",\n  \"destino_lat\": 14.84,\n  \"destino_lng\": -91.52\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Ver Repartidores Disponibles",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/repartidores/disponibles",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "repartidores", "disponibles"]
+        },
+        "description": "Lista repartidores simulados disponibles. Pendiente reemplazar por Administracion/Broker."
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Feed De Pedidos Disponibles",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/feed/disponibles",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "feed", "disponibles"]
+        },
+        "description": "La UI puede usar polling temporal sobre este endpoint hasta implementar WebSocket. No expone telefonos ni datos sensibles."
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Preview Del Pedido",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/feed/{{entrega_id}}/preview",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "feed", "{{entrega_id}}", "preview"]
+        },
+        "description": "Preview antes de aceptar. Muestra informacion suficiente para decidir, sin telefonos."
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Aceptar Pedido",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/feed/{{entrega_id}}/aceptar",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "feed", "{{entrega_id}}", "aceptar"]
+        },
+        "description": "Cambia la entrega a asignada, crea asignacion activa, cambia repartidor a ocupado y notifica ACCEPTED a Restaurantes.",
+        "body": { "mode": "raw", "raw": "{\n  \"repartidor_id\": {{repartidor_id}},\n  \"comentario\": \"Pedido aceptado desde UI\"\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Detalles Completos Post-Aceptacion",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}/detalles",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "entregas", "{{entrega_id}}", "detalles"]
+        },
+        "description": "Despues de aceptar, la UI puede mostrar telefonos, direccion exacta e instrucciones. Falta endurecer permisos reales cuando llegue Auth/Broker."
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Actualizar Ubicacion",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/repartidores/me/ubicacion",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "repartidores", "me", "ubicacion"]
+        },
+        "description": "Simula tracking GPS REST. Pendiente WebSocket para tiempo real.",
+        "body": { "mode": "raw", "raw": "{\n  \"lat\": 14.839,\n  \"lng\": -91.521,\n  \"heading\": 180,\n  \"entrega_id\": {{entrega_id}}\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Marcar Pedido Recogido",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}/recogida",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "entregas", "{{entrega_id}}", "recogida"]
+        },
+        "description": "Cambia entrega a en_ruta y notifica PICKED_UP a Restaurantes, que cambia a En Camino.",
+        "body": { "mode": "raw", "raw": "{\n  \"comentario\": \"Pedido recogido en restaurante\"\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Marcar Entregado",
+      "request": {
+        "method": "PATCH",
+        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "x-user-id", "value": "{{repartidor_id}}" }, { "key": "x-user-role", "value": "repartidor" }],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}/entregada",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "entregas", "{{entrega_id}}", "entregada"]
+        },
+        "description": "Cambia entrega a entregada, libera repartidor, cierra asignacion y notifica DELIVERED a Restaurantes, que cambia a Entregado.",
+        "body": { "mode": "raw", "raw": "{\n  \"comentario\": \"Pedido entregado al cliente\"\n}" }
+      },
+      "response": []
+    },
+    {
+      "name": "10 - Historial Entrega",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/entregas/{{entrega_id}}/historial",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "entregas", "{{entrega_id}}", "historial"]
+        },
+        "description": "Debe mostrar pendiente, asignada, en_ruta, entregada."
+      },
+      "response": []
+    },
+    {
+      "name": "11 - Notificaciones A Restaurante",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/logistica/notificaciones?entrega_id={{entrega_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "logistica", "notificaciones"],
+          "query": [{ "key": "entrega_id", "value": "{{entrega_id}}" }]
+        },
+        "description": "Verifica si ACCEPTED, PICKED_UP y DELIVERED fueron exitosas."
+      },
+      "response": []
+    },
+    {
+      "name": "12 - Nota WebSocket Pendiente",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/logistica/feed/disponibles", "host": ["{{base_url}}"], "path": ["api", "logistica", "feed", "disponibles"] },
+        "description": "WebSocket pendiente: /ws/orders/available, /ws/orders/:id/live-updates y /ws/couriers/me/location. Mientras tanto usar polling REST sobre feed/disponibles y PATCH ubicacion."
+      },
+      "response": []
+    }
+  ]
+}

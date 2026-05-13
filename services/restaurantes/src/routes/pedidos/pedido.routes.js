@@ -13,6 +13,12 @@ router.get('/', pedidoCtrl.getAll);
 // POST /restaurantes/:restaurante_id/pedidos - Crear pedido en el restaurante
 router.post('/', pedidoCtrl.create);
 
+// GET /restaurantes/:restaurante_id/pedidos/:id/logistica - Obtener payload para Logistica
+router.get('/:id/logistica', pedidoCtrl.getLogisticaPayload);
+
+// PATCH /restaurantes/:restaurante_id/pedidos/:id/logistica-status - Recibir cambios desde Logistica
+router.patch('/:id/logistica-status', pedidoCtrl.actualizarEstadoLogistica);
+
 // GET /restaurantes/:restaurante_id/pedidos/:id - Obtener pedido específico
 router.get('/:id', pedidoCtrl.getById);
 

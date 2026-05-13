@@ -1,9 +1,14 @@
 //analisis
-const { sequelize } = require('../../config/database');
-const Pedido = require('../../models/pedidos/pedido.model');
-const EstadoPedido = require('../../models/pedidos/estado-pedido.model');
-const HistorialEstadosPedido = require('../../models/pedidos/historial-estados-pedido.model');
-const DetallePedido = require('../../models/pedidos/detalle-pedido.model');
+const {
+  sequelize,
+  Pedido,
+  EstadoPedido,
+  HistorialEstadosPedido,
+  DetallePedido,
+  Restaurante,
+  Producto,
+  Combo
+} = require('../../models');
 
 // 1=pendiente, 2=confirmado, 3=en_preparacion, 4=listo, 5=en_camino, 6=entregado, 7=cancelado
 const ESTADO = {
@@ -15,6 +20,21 @@ const ESTADO = {
   ENTREGADO:      6,
   CANCELADO:      7
 };
+
+const ESTADOS_LOGISTICA = {
+  pendiente: ESTADO.CONFIRMADO,
+  asignada: ESTADO.CONFIRMADO,
+  en_ruta: ESTADO.EN_CAMINO,
+  entregada: ESTADO.ENTREGADO,
+  cancelada: ESTADO.CANCELADO,
+  fallida: ESTADO.CANCELADO
+};
+
+const buildDetallesOrden = (detalles = []) => detalles.map((detalle) => {
+  const cantidad = detalle.cantidad || 0;
+  const nombre = detalle.producto?.nombre || detalle.combo?.nombre || `Item ${detalle.id}`;
+  return `${cantidad}x ${nombre}`;
+});
 
 // GET /api/pedidos
 exports.getAll = async (req, res, next) => {
@@ -28,11 +48,83 @@ exports.getAll = async (req, res, next) => {
 
     const pedidos = await Pedido.findAll({
       where,
-      include: [{ model: EstadoPedido, as: 'estado' }],
-      order: [['fecha_pedido', 'DESC']]
+      include: [
+        { model: EstadoPedido, as: 'estado' },
+        {
+          model: DetallePedido,
+          as: 'detalles',
+          include: [
+            { model: Producto, as: 'producto', attributes: ['id', 'nombre'] },
+            { model: Combo, as: 'combo', attributes: ['id', 'nombre'] }
+          ]
+        }
+      ],
+      order: [['fecha_creacion', 'DESC']]
     });
 
     res.json({ success: true, data: pedidos, count: pedidos.length });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/restaurantes/:restaurante_id/pedidos/:id/logistica
+exports.getLogisticaPayload = async (req, res, next) => {
+  try {
+    const { restaurante_id, id } = req.params;
+
+    const pedido = await Pedido.findOne({
+      where: { id, restaurante_id },
+      include: [
+        { model: Restaurante, as: 'restaurante' },
+        { model: EstadoPedido, as: 'estado' },
+        {
+          model: DetallePedido,
+          as: 'detalles',
+          include: [
+            { model: Producto, as: 'producto', attributes: ['id', 'nombre'] },
+            { model: Combo, as: 'combo', attributes: ['id', 'nombre'] }
+          ]
+        }
+      ]
+    });
+
+    if (!pedido) {
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
+    }
+
+    const restaurante = pedido.restaurante;
+    const detallesOrden = buildDetallesOrden(pedido.detalles);
+
+    res.json({
+      success: true,
+      data: {
+        orden_id: pedido.id,
+        tipo_origen: 'pedido',
+        empresa_id: pedido.restaurante_id,
+        sucursal_id: null,
+        cliente_id: pedido.cliente_id,
+        categoria_codigo: 'FOOD',
+        metodo_pago: pedido.cobro_id ? 'ONLINE' : 'CASH',
+        tarifa_ofrecida: null,
+        monto_cobrar: parseFloat(pedido.total),
+        distancia_estimada_km: null,
+        negocio_nombre: restaurante?.nombre || null,
+        negocio_telefono: restaurante?.telefono || null,
+        negocio_direccion: restaurante?.direccion || null,
+        origen_coordenadas: null,
+        cliente_nombre: null,
+        cliente_telefono: null,
+        direccion_entrega: pedido.direccion_entrega,
+        referencia_direccion: null,
+        instrucciones_entrega: pedido.notas || null,
+        destino_coordenadas: null,
+        detalles_orden: detallesOrden,
+        fecha_entrega_estimada: null,
+        estado_pedido: pedido.estado?.nombre || null,
+        estado_id: pedido.estado_id
+      }
+    });
   } catch (error) {
     next(error);
   }
@@ -47,11 +139,17 @@ exports.getById = async (req, res, next) => {
       where: { id, restaurante_id },
       include: [
         { model: EstadoPedido, as: 'estado' },
-        { model: DetallePedido, as: 'detalles' },
+        {
+          model: DetallePedido,
+          as: 'detalles',
+          include: [
+            { model: Producto, as: 'producto', attributes: ['id', 'nombre'] },
+            { model: Combo, as: 'combo', attributes: ['id', 'nombre'] }
+          ]
+        },
         {
           model: HistorialEstadosPedido,
-          as: 'historial_estados',
-          include: [{ model: EstadoPedido, as: 'estado' }]
+          as: 'historial_estados'
         }
       ]
     });
@@ -173,7 +271,7 @@ exports.create = async (req, res, next) => {
       total,
       direccion_entrega,
       notas:              notas || null,
-      fecha_pedido:       new Date()
+      fecha_creacion:     new Date()
     }, { transaction: t });
 
     for (const item of itemsValidados) {
@@ -183,6 +281,7 @@ exports.create = async (req, res, next) => {
     await HistorialEstadosPedido.create({
       pedido_id:    pedido.id,
       estado_id:    ESTADO.PENDIENTE,
+      estado_nombre: 'Recibido',
       fecha_cambio: new Date(),
       motivo:       'Pedido creado'
     }, { transaction: t });
@@ -233,7 +332,7 @@ exports.cambiarEstado = async (req, res, next) => {
   const t = await sequelize.transaction();
   try {
     const { restaurante_id, id } = req.params;
-    const { estado_id, motivo } = req.body;
+    const { estado_id, motivo, metadata } = req.body;
 
     if (!estado_id) {
       await t.rollback();
@@ -261,13 +360,25 @@ exports.cambiarEstado = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'El estado no existe' });
     }
 
-    await pedido.update({ estado_id, fecha_actualizacion: new Date() }, { transaction: t });
+    await pedido.update({
+      estado_id,
+      repartidor_id: metadata?.repartidor_id !== undefined ? metadata.repartidor_id : pedido.repartidor_id,
+      fecha_actualizacion: new Date()
+    }, { transaction: t });
+
+    const motivoHistorial = [
+      motivo || null,
+      metadata?.estado_logistica ? `estado_logistica=${metadata.estado_logistica}` : null,
+      metadata?.entrega_id ? `entrega_id=${metadata.entrega_id}` : null,
+      metadata?.timestamp ? `timestamp=${metadata.timestamp}` : null
+    ].filter(Boolean).join(' | ');
 
     await HistorialEstadosPedido.create({
       pedido_id:    pedido.id,
       estado_id,
+      estado_nombre: estado.nombre,
       fecha_cambio: new Date(),
-      motivo:       motivo || null
+      motivo:       motivoHistorial || null
     }, { transaction: t });
 
     await t.commit();
@@ -275,7 +386,79 @@ exports.cambiarEstado = async (req, res, next) => {
     res.json({
       success: true,
       message: `Estado actualizado a "${estado.nombre}"`,
-      data: { pedido_id: pedido.id, estado_id, estado_nombre: estado.nombre }
+      data: { pedido_id: pedido.id, estado_id, estado_nombre: estado.nombre, metadata: metadata || null }
+    });
+  } catch (error) {
+    await t.rollback();
+    next(error);
+  }
+};
+
+// PATCH /api/restaurantes/:restaurante_id/pedidos/:id/logistica-status
+exports.actualizarEstadoLogistica = async (req, res, next) => {
+  const t = await sequelize.transaction();
+  try {
+    const { restaurante_id, id } = req.params;
+    const { entrega_id, estado_logistica, evento, repartidor_id, comentario, timestamp } = req.body;
+
+    if (!estado_logistica) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'estado_logistica es requerido' });
+    }
+
+    const estadoId = ESTADOS_LOGISTICA[estado_logistica];
+    if (!estadoId) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'estado_logistica no soportado' });
+    }
+
+    const pedido = await Pedido.findOne({ where: { id, restaurante_id }, transaction: t });
+    if (!pedido) {
+      await t.rollback();
+      return res.status(404).json({ success: false, message: 'Pedido no encontrado en este restaurante' });
+    }
+
+    const estado = await EstadoPedido.findByPk(estadoId, { transaction: t });
+    if (!estado) {
+      await t.rollback();
+      return res.status(400).json({ success: false, message: 'El estado interno mapeado no existe' });
+    }
+
+    await pedido.update({
+      estado_id: estadoId,
+      repartidor_id: repartidor_id !== undefined ? repartidor_id : pedido.repartidor_id,
+      fecha_actualizacion: new Date()
+    }, { transaction: t });
+
+    const motivo = [
+      evento || estado_logistica,
+      entrega_id ? `entrega_id=${entrega_id}` : null,
+      comentario || null,
+      timestamp ? `timestamp=${timestamp}` : null
+    ].filter(Boolean).join(' | ');
+
+    await HistorialEstadosPedido.create({
+      pedido_id: pedido.id,
+      estado_id: estadoId,
+      estado_nombre: estado.nombre,
+      fecha_cambio: timestamp ? new Date(timestamp) : new Date(),
+      motivo
+    }, { transaction: t });
+
+    await t.commit();
+
+    res.json({
+      success: true,
+      message: 'Estado logistico registrado exitosamente',
+      data: {
+        pedido_id: pedido.id,
+        entrega_id: entrega_id || null,
+        estado_logistica,
+        evento: evento || null,
+        estado_id: estadoId,
+        estado_nombre: estado.nombre,
+        repartidor_id: pedido.repartidor_id
+      }
     });
   } catch (error) {
     await t.rollback();

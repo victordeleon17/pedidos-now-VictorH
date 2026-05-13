@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "Logistica - Restaurantes y Negocios",
+    "_postman_id": "logistica-restaurantes-negocios-04052026",
+    "description": "Endpoints que Restaurantes y Negocios pueden usar para crear entregas, consultar estado y validar el flujo de notificaciones. Restaurantes ya esta integrado contra https://restaurantes.fly.dev/api. Negocios puede reutilizar el mismo contrato cuando tenga su API lista.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "logistica_base_url", "value": "http://localhost:3005", "type": "string" },
+    { "key": "restaurantes_base_url", "value": "https://restaurantes.fly.dev/api", "type": "string" },
+    { "key": "restaurante_id", "value": "1", "type": "string" },
+    { "key": "pedido_id", "value": "2", "type": "string" },
+    { "key": "entrega_id", "value": "4", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "00 - Health Logistica",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{logistica_base_url}}/health", "host": ["{{logistica_base_url}}"], "path": ["health"] },
+        "description": "Verifica que el servicio de Logistica este corriendo."
+      },
+      "response": []
+    },
+    {
+      "name": "01 - Health Restaurantes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "https://restaurantes.fly.dev/health", "protocol": "https", "host": ["restaurantes", "fly", "dev"], "path": ["health"] },
+        "description": "Verifica que Restaurantes este desplegado."
+      },
+      "response": []
+    },
+    {
+      "name": "02 - Crear Pedido Real En Restaurantes",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{restaurantes_base_url}}/restaurantes/{{restaurante_id}}/pedidos",
+          "host": ["{{restaurantes_base_url}}"],
+          "path": ["restaurantes", "{{restaurante_id}}", "pedidos"]
+        },
+        "description": "Crea un pedido real en Restaurantes. Usar producto_id 2 porque existe activo en restaurante 1.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente_id\": 100,\n  \"direccion_entrega\": \"Direccion test logistica\",\n  \"notas\": \"Pedido creado para integracion con Logistica\",\n  \"descuento_aplicado\": 0,\n  \"items\": [\n    { \"producto_id\": 2, \"cantidad\": 1, \"descuento\": 0 }\n  ]\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 - Obtener Payload Logistico Desde Restaurantes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{restaurantes_base_url}}/restaurantes/{{restaurante_id}}/pedidos/{{pedido_id}}/logistica",
+          "host": ["{{restaurantes_base_url}}"],
+          "path": ["restaurantes", "{{restaurante_id}}", "pedidos", "{{pedido_id}}", "logistica"]
+        },
+        "description": "Endpoint que Logistica consume para crear una entrega con datos reales del pedido."
+      },
+      "response": []
+    },
+    {
+      "name": "04 - Crear Entrega En Logistica Desde Restaurante",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": {
+          "raw": "{{logistica_base_url}}/api/logistica/entregas/restaurantes/{{restaurante_id}}/pedidos/{{pedido_id}}",
+          "host": ["{{logistica_base_url}}"],
+          "path": ["api", "logistica", "entregas", "restaurantes", "{{restaurante_id}}", "pedidos", "{{pedido_id}}"]
+        },
+        "description": "Restaurantes llama este endpoint cuando quiere enviar un pedido a Logistica. Logistica consume el payload logistico real de Restaurantes y crea una entrega pendiente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente_nombre\": \"Cliente Integracion\",\n  \"cliente_telefono\": \"5555-1111\",\n  \"destino_lat\": 14.84,\n  \"destino_lng\": -91.52\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 - Consultar Entrega En Logistica",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{logistica_base_url}}/api/logistica/entregas/{{entrega_id}}",
+          "host": ["{{logistica_base_url}}"],
+          "path": ["api", "logistica", "entregas", "{{entrega_id}}"]
+        },
+        "description": "Consulta detalle de la entrega creada en Logistica."
+      },
+      "response": []
+    },
+    {
+      "name": "06 - Historial Entrega En Logistica",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{logistica_base_url}}/api/logistica/entregas/{{entrega_id}}/historial",
+          "host": ["{{logistica_base_url}}"],
+          "path": ["api", "logistica", "entregas", "{{entrega_id}}", "historial"]
+        },
+        "description": "Historial interno de estados de Logistica."
+      },
+      "response": []
+    },
+    {
+      "name": "07 - Notificaciones Hacia Restaurante",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{logistica_base_url}}/api/logistica/notificaciones?entrega_id={{entrega_id}}",
+          "host": ["{{logistica_base_url}}"],
+          "path": ["api", "logistica", "notificaciones"],
+          "query": [{ "key": "entrega_id", "value": "{{entrega_id}}" }]
+        },
+        "description": "Muestra si las notificaciones de estado hacia Restaurantes fueron exitosas."
+      },
+      "response": []
+    },
+    {
+      "name": "08 - Consultar Pedido En Restaurantes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{restaurantes_base_url}}/restaurantes/{{restaurante_id}}/pedidos/{{pedido_id}}",
+          "host": ["{{restaurantes_base_url}}"],
+          "path": ["restaurantes", "{{restaurante_id}}", "pedidos", "{{pedido_id}}"]
+        },
+        "description": "Permite confirmar que Restaurante cambio su estado despues de recibir notificaciones de Logistica."
+      },
+      "response": []
+    },
+    {
+      "name": "09 - Historial Pedido En Restaurantes",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{restaurantes_base_url}}/restaurantes/{{restaurante_id}}/pedidos/{{pedido_id}}/historial",
+          "host": ["{{restaurantes_base_url}}"],
+          "path": ["restaurantes", "{{restaurante_id}}", "pedidos", "{{pedido_id}}", "historial"]
+        },
+        "description": "Historial en Restaurante. Debe reflejar Recibido, Listo, En Camino y Entregado durante el flujo completo."
+      },
+      "response": []
+    }
+  ]
+}
