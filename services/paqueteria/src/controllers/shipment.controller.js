@@ -1,26 +1,16 @@
-const { Shipment, Courier, User, Package } = require('../models');
+const { Shipment, User, Courier } = require('../models');
 
 const shipmentController = {
+
+  //  Obtener todos
   async getAll(req, res) {
     try {
       const shipments = await Shipment.findAll({
         where: { status: true },
         include: [
-          {
-            model: Courier,
-            as: 'courier',
-            attributes: ['idCourier', 'name', 'status']
-          },
-          {
-            model: User,
-            as: 'sender',
-            attributes: ['idUser', 'name', 'status']
-          },
-          {
-            model: User,
-            as: 'receiver',
-            attributes: ['idUser', 'name', 'status']
-          }
+          { model: User, as: 'sender' },
+          { model: User, as: 'receiver' },
+          { model: Courier, as: 'courier' }
         ],
         order: [['idShipment', 'DESC']]
       });
@@ -34,31 +24,16 @@ const shipmentController = {
     }
   },
 
+  //  Obtener por ID
   async getById(req, res) {
     try {
       const { id } = req.params;
 
       const shipment = await Shipment.findByPk(id, {
         include: [
-          {
-            model: Courier,
-            as: 'courier',
-            attributes: ['idCourier', 'name', 'status']
-          },
-          {
-            model: User,
-            as: 'sender',
-            attributes: ['idUser', 'name', 'status']
-          },
-          {
-            model: User,
-            as: 'receiver',
-            attributes: ['idUser', 'name', 'status']
-          },
-          {
-            model: Package,
-            as: 'packages'
-          }
+          { model: User, as: 'sender' },
+          { model: User, as: 'receiver' },
+          { model: Courier, as: 'courier' }
         ]
       });
 
@@ -75,60 +50,58 @@ const shipmentController = {
     }
   },
 
+  //  Crear envío
   async create(req, res) {
     try {
-      const deliveryInstructions =
-        req.body.deliveryInstructions ?? req.body.delivery_instructions;
-
-      const shipmentStatus =
-        req.body.shipmentStatus ?? req.body.shipment_status ?? 'pending';
-
-      const chargeType =
-        req.body.chargeType ?? req.body.charge_type;
-
-      const estimatedDeliveryTime =
-        req.body.estimatedDeliveryTime ?? req.body.estimated_delivery_time;
-
-      const senderId =
-        req.body.senderId ?? req.body.sender_id;
-
-      const receiverId =
-        req.body.receiverId ?? req.body.receiver_id;
-
-      const courierId =
-        req.body.courierId ?? req.body.courier_id ?? null;
-
-      const invoiceSeries =
-        req.body.invoiceSeries ?? req.body.invoice_series;
-
-      const total = req.body.total;
-      const status = req.body.status ?? true;
+      const {
+        senderId,
+        receiverId,
+        deliveryInstructions,
+        chargeType
+      } = req.body;
 
       if (!senderId || !receiverId) {
         return res.status(400).json({
-          message: 'senderId y receiverId son obligatorios'
+          message: 'Sender y Receiver son obligatorios'
         });
       }
 
-      const newShipment = await Shipment.create({
-        deliveryInstructions,
-        total,
-        shipmentStatus,
-        chargeType,
-        estimatedDeliveryTime,
+      const sender = await User.findByPk(senderId);
+      const receiver = await User.findByPk(receiverId);
+
+      if (!sender || !receiver) {
+        return res.status(404).json({
+          message: 'Usuarios no válidos'
+        });
+      }
+
+      const shipment = await Shipment.create({
         senderId,
         receiverId,
-        courierId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        invoiceSeries,
-        status
+        deliveryInstructions,
+        chargeType,
+        shipmentStatus: 'pending'
       });
+
+      // Cancelación automática en 5 minutos
+      setTimeout(async () => {
+        try {
+          const current = await Shipment.findByPk(shipment.idShipment);
+
+          if (current && current.shipmentStatus === 'pending') {
+            await current.update({ shipmentStatus: 'cancelled' });
+            console.log(`Shipment ${shipment.idShipment} cancelado por timeout`);
+          }
+        } catch (err) {
+          console.error('Error en cancelación automática:', err.message);
+        }
+      }, 5 * 60 * 1000);
 
       res.status(201).json({
         message: 'Envío creado correctamente',
-        data: newShipment
+        data: shipment
       });
+
     } catch (error) {
       res.status(500).json({
         message: 'Error al crear envío',
@@ -137,66 +110,95 @@ const shipmentController = {
     }
   },
 
-  async update(req, res) {
+  //  Aceptar envío (asignar repartidor)
+  async accept(req, res) {
     try {
       const { id } = req.params;
+      const { courierId } = req.body;
 
       const shipment = await Shipment.findByPk(id);
 
       if (!shipment) {
-        return res.status(404).json({ message: 'Envío no encontrado' });
+        return res.status(404).json({
+          message: 'Envío no encontrado'
+        });
       }
 
-      const deliveryInstructions =
-        req.body.deliveryInstructions ?? req.body.delivery_instructions ?? shipment.deliveryInstructions;
+      if (shipment.shipmentStatus !== 'pending') {
+        return res.status(400).json({
+          message: 'El envío ya no está disponible'
+        });
+      }
 
-      const shipmentStatus =
-        req.body.shipmentStatus ?? req.body.shipment_status ?? shipment.shipmentStatus;
+      const courier = await Courier.findByPk(courierId);
 
-      const chargeType =
-        req.body.chargeType ?? req.body.charge_type ?? shipment.chargeType;
-
-      const estimatedDeliveryTime =
-        req.body.estimatedDeliveryTime ?? req.body.estimated_delivery_time ?? shipment.estimatedDeliveryTime;
-
-      const senderId =
-        req.body.senderId ?? req.body.sender_id ?? shipment.senderId;
-
-      const receiverId =
-        req.body.receiverId ?? req.body.receiver_id ?? shipment.receiverId;
-
-      const courierId =
-        req.body.courierId ?? req.body.courier_id ?? shipment.courierId;
-
-      const invoiceSeries =
-        req.body.invoiceSeries ?? req.body.invoice_series ?? shipment.invoiceSeries;
+      if (!courier) {
+        return res.status(404).json({
+          message: 'Repartidor no encontrado'
+        });
+      }
 
       await shipment.update({
-        deliveryInstructions,
-        total: req.body.total ?? shipment.total,
-        shipmentStatus,
-        chargeType,
-        estimatedDeliveryTime,
-        senderId,
-        receiverId,
         courierId,
-        updatedAt: new Date(),
-        invoiceSeries,
-        status: req.body.status ?? shipment.status
+        shipmentStatus: 'assigned'
       });
 
       res.json({
-        message: 'Envío actualizado correctamente',
-        data: shipment
+        message: 'Pedido asignado exitosamente'
       });
+
     } catch (error) {
       res.status(500).json({
-        message: 'Error al actualizar envío',
+        message: 'Error al aceptar envío',
         error: error.message
       });
     }
   },
 
+  // 🔹 Cambiar estado
+  async updateStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      const shipment = await Shipment.findByPk(id);
+
+      if (!shipment) {
+        return res.status(404).json({
+          message: 'Envío no encontrado'
+        });
+      }
+
+      const validTransitions = {
+        assigned: ['in_transit'],
+        in_transit: ['delivered']
+      };
+
+      const current = shipment.shipmentStatus;
+
+      if (!validTransitions[current]?.includes(status)) {
+        return res.status(400).json({
+          message: `No puedes cambiar de ${current} a ${status}`
+        });
+      }
+
+      await shipment.update({
+        shipmentStatus: status
+      });
+
+      res.json({
+        message: `Estado actualizado a ${status}`
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        message: 'Error al actualizar estado',
+        error: error.message
+      });
+    }
+  },
+
+  // 🔹 Eliminar lógico
   async remove(req, res) {
     try {
       const { id } = req.params;
@@ -204,15 +206,17 @@ const shipmentController = {
       const shipment = await Shipment.findByPk(id);
 
       if (!shipment) {
-        return res.status(404).json({ message: 'Envío no encontrado' });
+        return res.status(404).json({
+          message: 'Envío no encontrado'
+        });
       }
 
-      await shipment.update({
-        status: false,
-        updatedAt: new Date()
+      await shipment.update({ status: false });
+
+      res.json({
+        message: 'Envío eliminado lógicamente'
       });
 
-      res.json({ message: 'Envío eliminado lógicamente' });
     } catch (error) {
       res.status(500).json({
         message: 'Error al eliminar envío',
@@ -220,6 +224,7 @@ const shipmentController = {
       });
     }
   }
+
 };
 
 module.exports = shipmentController;

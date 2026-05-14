@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const reembolsoController = require('../controllers/reembolso.controller');
-const { verificarToken } = require('../middleware/auth.middleware');
+
+const reembolsoController =
+    require('../controllers/reembolso.controller');
+
+const {
+    verificarToken
+} = require('../middleware/auth.middleware');
 
 // Aplicar validación de token a todas las rutas
 router.use(verificarToken);

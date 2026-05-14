@@ -1,2 +1,5 @@
-// Exportar servicios externos y lógica de negocio
-module.exports = {};
+module.exports = {
+    http: require('./http.service'),
+    restaurantes: require('./restaurantes.service'),
+    notificaciones: require('./notificaciones.service')
+};

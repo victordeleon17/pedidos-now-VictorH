@@ -1,7 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const pagosController = require('../controllers/pagos_agentes.controller');
-const { verificarToken } = require('../middleware/auth.middleware');
+
+const pagosController =
+    require('../controllers/pagos_agentes.controller');
+
+const {
+    verificarToken
+} = require('../middleware/auth.middleware');
 
 // Aplicar validación de token a todas las rutas
 router.use(verificarToken);
@@ -19,6 +24,9 @@ router.get('/:id', pagosController.obtenerPagoPorId);
 router.get('/total', pagosController.obtenerTotalPagos);
 
 // GET - Obtener pagos de un agente específico
-router.get('/agente/:agente_id', pagosController.obtenerPagosPorAgente);
+router.get(
+    '/agente/:agente_id',
+    pagosController.obtenerPagosPorAgente
+);
 
 module.exports = router;

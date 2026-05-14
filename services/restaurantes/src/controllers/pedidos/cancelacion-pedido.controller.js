@@ -110,6 +110,7 @@ exports.cancelar = async (req, res, next) => {
     await HistorialEstadosPedido.create({
       pedido_id,
       estado_id:    ESTADO_CANCELADO,
+      estado_nombre: 'Cancelado',
       fecha_cambio: new Date(),
       motivo:       `Cancelado por ${cancelado_por}: ${motivo}`
     }, { transaction: t });

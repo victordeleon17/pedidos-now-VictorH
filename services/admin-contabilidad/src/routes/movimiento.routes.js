@@ -1,24 +1,88 @@
 const express = require('express');
 const router = express.Router();
-const movimientoController = require('../controllers/movimiento.controller');
-const { verificarToken } = require('../middleware/auth.middleware');
 
-// Aplicar validación de token a todas las rutas
+const movimientoController =
+    require('../controllers/movimiento.controller');
+
+const {
+    verificarToken
+} = require('../middleware/auth.middleware');
+
+/**
+ * @swagger
+ * /api/movimientos/test:
+ *   get:
+ *     summary: Probar que las rutas de movimientos funcionan
+ *     tags: [Movimientos]
+ *     responses:
+ *       200:
+ *         description: Ruta de prueba funcionando
+ */
+router.get('/test', (req, res) => {
+    res.json({
+        ok: true,
+        message: 'Movimiento OK'
+    });
+});
+
+// Aplicar auth global
 router.use(verificarToken);
 
-// POST - Crear movimiento (ingreso o egreso)
-router.post('/', movimientoController.crearMovimiento);
+/**
+ * @swagger
+ * /api/movimientos:
+ *   get:
+ *     summary: Obtener todos los movimientos financieros
+ *     tags: [Movimientos]
+ */
+router.get(
+    '/',
+    movimientoController.obtenerMovimientos
+);
 
-// GET - Obtener todos los movimientos con filtros
-router.get('/', movimientoController.obtenerMovimientos);
+/**
+ * @swagger
+ * /api/movimientos/{id}:
+ *   get:
+ *     summary: Obtener movimiento financiero por ID
+ *     tags: [Movimientos]
+ */
+router.get(
+    '/:id',
+    movimientoController.getMovimientoById
+);
 
-// GET - Obtener saldo actual de una cuenta
-router.get('/saldo/:cuenta_id', movimientoController.obtenerSaldo);
+// ===== CRUD GENERAL =====
+router.post(
+    '/',
+    movimientoController.crearMovimiento
+);
 
-// GET - Obtener movimientos por período
-router.get('/periodo', movimientoController.obtenerMovimientosPorPeriodo);
+router.put(
+    '/:id',
+    movimientoController.updateMovimiento
+);
 
-// GET - Obtener estadísticas
-router.get('/estadisticas', movimientoController.obtenerEstadisticas);
+router.delete(
+    '/:id',
+    movimientoController.deleteMovimiento
+);
+
+// ===== TUS ENDPOINTS ORIGINALES =====
+
+router.get(
+    '/saldo/:cuenta_id',
+    movimientoController.obtenerSaldo
+);
+
+router.get(
+    '/periodo',
+    movimientoController.obtenerMovimientosPorPeriodo
+);
+
+router.get(
+    '/estadisticas',
+    movimientoController.obtenerEstadisticas
+);
 
 module.exports = router;

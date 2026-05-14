@@ -1,36 +1,71 @@
-// Admin-contabilidad Kenneth & Emmanuel
-const { Pool } = require('pg');
-const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// ========== CONFIGURACIÓN POSTGRESQL CON NEON.TECH ==========
+const { Pool } = require('pg');
+const { Sequelize } = require('sequelize');
+
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  throw new Error('Falta DATABASE_URL en variables de entorno');
+}
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
+  connectionString,
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 const sequelize = new Sequelize(
-    process.env.DATABASE_URL,
-    {
-        dialect: 'postgres',
-        logging: false,
-        pool: {
-            max: 5,
-            min: 0,
-            acquire: 30000,
-            idle: 10000
-        },
-        ssl: true,
-        dialectOptions: {
-            ssl: {
-                require: true,
-                rejectUnauthorized: false
-            }
-        }
+  connectionString,
+  {
+    dialect: 'postgres',
+    logging: false,
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    ssl: true,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
     }
+  }
 );
 
-module.exports = { pool, sequelize };
+const normalizeQuery = (sql, params = []) => {
+  let index = 0;
+
+  const normalizedSql = sql
+    .replace(/IFNULL/gi, 'COALESCE')
+    .replace(/CURDATE\(\)/gi, 'CURRENT_DATE')
+    .replace(/NOW\(\)/gi, 'CURRENT_TIMESTAMP')
+    .replace(/\?/g, () => `$${++index}`);
+
+  return {
+    sql: normalizedSql,
+    params
+  };
+};
+
+const query = async (sql, params = []) => {
+  const normalized = normalizeQuery(sql, params);
+  const result = await pool.query(normalized.sql, normalized.params);
+
+  result[Symbol.iterator] = function* () {
+    yield result.rows;
+    yield result;
+  };
+
+  return result;
+};
+
+module.exports = {
+  pool,
+  sequelize,
+  query
+};
