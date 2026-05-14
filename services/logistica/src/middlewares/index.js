@@ -1,2 +1,3 @@
-// Exportar middlewares
-module.exports = {};
+module.exports = {
+    ...require('./auth.middleware')
+};

@@ -2,7 +2,7 @@
  * Script de sincronización de base de datos
  * Ejecutar: node syncDatabase.js
  * 
- * - En desarrollo: crea/modifica tablas automáticamente (alter: true)
+ * - En desarrollo: crea tablas faltantes sin alter automatico
  * - En producción: solo crea tablas nuevas (alter: false)
  */
 
@@ -32,15 +32,15 @@ const syncDatabase = async () => {
         
         // Sincronizar según el ambiente
         if (env.NODE_ENV === 'production') {
-            // En producción: solo crea tablas nuevas, no modifica existentes
-            console.log('⚙️  Modo PRODUCCIÓN: Solo creación de tablas nuevas...');
-            await sequelize.sync({ alter: false });
-            console.log('✅ Base de datos sincronizada (producción: sin modificaciones).\n');
+            // En producción: crea tablas si no existen
+            console.log('⚙️  Modo PRODUCCIÓN: Creando tablas...');
+            await sequelize.sync();
+            console.log('✅ Base de datos sincronizada (producción: tablas creadas).\n');
         } else {
-            // En desarrollo: permite modificar estructura
-            console.log('⚙️  Modo DESARROLLO: Permitiendo alteraciones de estructura...');
-            await sequelize.sync({ alter: true });
-            console.log('✅ Base de datos sincronizada (desarrollo: con alter).\n');
+            // En desarrollo evitamos alter automatico: Sequelize genera SQL invalido con ENUMs en Postgres existentes.
+            console.log('⚙️  Modo DESARROLLO: Creando tablas faltantes sin alter automatico...');
+            await sequelize.sync();
+            console.log('✅ Base de datos sincronizada (desarrollo: tablas faltantes creadas).\n');
         }
         
         // Verificar tablas creadas
@@ -92,7 +92,7 @@ const syncDatabase = async () => {
         // Insertar categorías iniciales si no existen
         console.log('📦 Verificando datos iniciales...\n');
         
-        const { CategoriaOrden } = require('./src/models');
+        const { CategoriaOrden, Repartidor } = require('./src/models');
         const countCategorias = await CategoriaOrden.count();
         
         if (countCategorias === 0) {
@@ -114,6 +114,17 @@ const syncDatabase = async () => {
             console.log('');
         } else {
             console.log(`   ✅ Ya existen ${countCategorias} categorías\n`);
+        }
+
+        const repartidoresMock = require('./src/data/repartidores.mock');
+        const countRepartidores = await Repartidor.count();
+
+        if (countRepartidores === 0) {
+            console.log('   🔧 Insertando repartidores simulados...\n');
+            await Repartidor.bulkCreate(repartidoresMock);
+            console.log(`   ✅ ${repartidoresMock.length} repartidores simulados creados\n`);
+        } else {
+            console.log(`   ✅ Ya existen ${countRepartidores} repartidores\n`);
         }
         
         await sequelize.close();

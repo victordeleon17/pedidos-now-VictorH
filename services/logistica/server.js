@@ -18,18 +18,11 @@ const startServer = async () => {
         
         console.log('');
 
-        // 2. Sincronizar modelos (solo en desarrollo o primera vez)
-        if (env.NODE_ENV === 'production') {
-            // En producción: solo verificar conexión, no sincronizar
-            console.log('📦 Modo producción: Base de datos lista (sin sincronización automática).');
-            console.log('   💡 Ejecuta "node syncDatabase.js" si necesitas crear/actualizar tablas.\n');
-        } else {
-            // En desarrollo: permite modificar estructura
-            console.log('📦 Modo desarrollo: Sincronizando modelos...');
-            require('./src/models'); // Cargar modelos
-            await sequelize.sync({ alter: false });
-            console.log('   ✅ Modelos sincronizados.\n');
-        }
+        // 2. Sincronizar modelos
+        console.log('📦 Sincronizando modelos...');
+        require('./src/models'); // Cargar modelos
+        await sequelize.sync();
+        console.log('   ✅ Modelos sincronizados.\n');
         
         // 3. Iniciar servidor
         const PORT = env.PORT;

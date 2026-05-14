@@ -24,6 +24,12 @@ const compensacionRoutes = require('./routes/compensacion.routes');
 // Admin-contabilidad Emmanuel
 const reportesRestaurantesRoutes = require('./routes/reportesRestaurantes.routes');
 
+//Admin-conta Jeff. Daniel Ramos
+//Admin-conta Jeff. Daniel Ramos
+const promocionesRoutes = require('./routes/promociones.routes');
+const promocionesReportesRoutes = require('./routes/promocionesReportes.routes');
+const cuponesRoutes = require('./routes/cupones.routes');
+
 const initDB = require('./database/init');
 
 const app = express();
@@ -97,7 +103,10 @@ app.use('/api/compensaciones', compensacionRoutes);
 // Admin-contabilidad Emmanuel
 app.use('/api/reportes-restaurantes', reportesRestaurantesRoutes);
 
-
+//Admin-conta Jeff. Daniel Ramos
+app.use(promocionesRoutes);
+app.use(promocionesReportesRoutes);
+app.use(cuponesRoutes);
 
 // Health check
 /**

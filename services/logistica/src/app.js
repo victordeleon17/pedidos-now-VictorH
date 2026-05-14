@@ -21,9 +21,8 @@ app.get('/health', (req, res) => {
     res.json({ status: 'healthy' });
 });
 
-// Importar rutas cuando estén listas
-// const logisticaRoutes = require('./routes');
-// app.use('/api/logistica', logisticaRoutes);
+const logisticaRoutes = require('./routes');
+app.use('/api/logistica', logisticaRoutes);
 
 // Manejo de errores 404
 app.use((req, res) => {
