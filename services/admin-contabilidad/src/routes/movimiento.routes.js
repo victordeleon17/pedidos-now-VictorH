@@ -1,19 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controller/movimiento.controller');
-const {validarMonto} = require('../middleware/validar');
+const movimientoController = require('../controllers/movimiento.controller');
+const { verificarToken } = require('../middleware/auth.middleware');
 
-// Rutas públicas
-router.get('/', controller.getAllMovimientos);
-router.get('/:id', controller.getMovimientoById);
+// Aplicar validación de token a todas las rutas
+router.use(verificarToken);
 
-// Rutas protegidas
-router.post('/', validarToken, controller.crearMovimiento);
-router.put('/:id', validarToken, controller.updateMovimiento);
-router.delete('/:id', validarToken, controller.deleteMovimiento);
+// POST - Crear movimiento (ingreso o egreso)
+router.post('/', movimientoController.crearMovimiento);
 
-router.get('/test', (req, res) => {
-    res.send('Movimiento OK');
-})
+// GET - Obtener todos los movimientos con filtros
+router.get('/', movimientoController.obtenerMovimientos);
+
+// GET - Obtener saldo actual de una cuenta
+router.get('/saldo/:cuenta_id', movimientoController.obtenerSaldo);
+
+// GET - Obtener movimientos por período
+router.get('/periodo', movimientoController.obtenerMovimientosPorPeriodo);
+
+// GET - Obtener estadísticas
+router.get('/estadisticas', movimientoController.obtenerEstadisticas);
 
 module.exports = router;

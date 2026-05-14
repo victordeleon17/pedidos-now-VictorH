@@ -1,13 +1,17 @@
 const validarMonto = (req, res, next) => {
-    const {monto} = req.body;
-    if(!monto || typeof monto !== 'number' || monto <= 0){
+    const { monto_total, idempotency_key } = req.body;
+
+    if (!idempotency_key) {
         return res.status(400).json({
-            error: 'Monto inválido'
+            error: 'idempotency_key es requerida'
         });
     }
-    next();
-};
 
-module.exports = {
-    validarMonto
+    if (!monto_total || typeof monto_total !== 'number' || monto_total <= 0) {
+        return res.status(400).json({
+            error: 'monto_total inválido'
+        });
+    }
+
+    next();
 };

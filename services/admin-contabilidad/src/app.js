@@ -1,3 +1,5 @@
+const path = require('path');
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -5,15 +7,17 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const compression = require('compression');
 
-const { sequelize } = require('./src/models');
+const { sequelize } = require('./config/db');
 
-const testRoutes = require('./src/routes/test.routes');
-const pagosAgentesRoutes = require('./src/routes/pagos_agentes.routes');
-const reportesRoutes = require('./src/routes/reportes.routes');
-const dashboardRoutes = require('./src/routes/dashboard.routes');
-const movimientoRoutes = require('./src/routes/movimiento.routes');
-const reembolsoRoutes = require('./src/routes/reembolso.routes');
-const compensacionRoutes = require('./src/routes/compensacion.routes');
+
+const testRoutes = require('./routes/test.routes');
+const pagosAgentesRoutes = require('./routes/pagos_agentes.routes');
+const reportesRoutes = require('./routes/reportes.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
+const movimientoRoutes = require('./routes/movimiento.routes');
+const reembolsoRoutes = require('./routes/reembolso.routes');
+const compensacionRoutes = require('./routes/compensacion.routes');
+const bancosRoutes = require('./routes/bancos.routes');
 
 // Admin-contabilidad Emmanuel
 const reportesRestaurantesRoutes = require('./routes/reportesRestaurantes.routes');
@@ -33,14 +37,18 @@ app.use(compression());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Rutas
-app.use('/', testRoutes);
-app.use('/api/reportes', reportesRoutes);
-app.use('/api/pagos-agentes', pagosAgentesRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/movimientos', movimientoRoutes);
-app.use('/api/reembolsos', reembolsoRoutes);
-app.use('/api/compensaciones', compensacionRoutes);
+// ========== RUTAS PÚBLICAS ==========
+app.use('/api/auth', require('./routes/auth.routes'));
+
+// ========== RUTAS PROTEGIDAS ==========
+app.use('/api/payments', require('./routes/cobros.routes'));
+app.use('/api/bancos', bancosRoutes);
+app.use('/api/compensaciones', require('./routes/compensacion.routes'));
+app.use('/api/pagos-agentes', require('./routes/pagos_agentes.routes'));
+app.use('/api/reembolsos', require('./routes/reembolso.routes'));
+app.use('/api/movimientos', require('./routes/movimiento.routes'));
+app.use('/api/reportes', require('./routes/reportes.routes'));
+app.use('/api/dashboard', require('./routes/dashboard.routes'));
 
 // Admin-contabilidad Emmanuel
 app.use('/api/reportes-restaurantes', reportesRestaurantesRoutes);
@@ -91,6 +99,15 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+app.get('/api/health', (req, res) => {
+    res.json({
+        estado: 'OK',
+        servicio: 'admin-contabilidad',
+        puerto: 3000,
+        timestamp: new Date().toISOString()
+    });
+});
 
 startServer();
 
