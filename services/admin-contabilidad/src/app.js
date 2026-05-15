@@ -24,7 +24,10 @@ const bancosRoutes = require('./routes/bancos.routes');
 // Admin-contabilidad Emmanuel
 const reportesRestaurantesRoutes = require('./routes/reportesRestaurantes.routes');
 
-//Admin-conta Jeff. Daniel Ramos
+// Admin-contabilidad Victor
+const reportesNegociosRoutes = require('./routes/reportesNegocios.routes');
+
+
 //Admin-conta Jeff. Daniel Ramos
 const promocionesRoutes = require('./routes/promociones.routes');
 const promocionesReportesRoutes = require('./routes/promocionesReportes.routes');
@@ -104,8 +107,16 @@ app.use('/api/movimientos', require('./routes/movimiento.routes'));
 app.use('/api/reportes', require('./routes/reportes.routes'));
 app.use('/api/dashboard', require('./routes/dashboard.routes'));
 
+
+
+
 // Admin-contabilidad Emmanuel
 app.use('/api/reportes-restaurantes', reportesRestaurantesRoutes);
+
+// Admin-contabilidad Victor
+
+
+app.use('/api/reportes-negocios', reportesNegociosRoutes);
 
 //Admin-conta Jeff. Daniel Ramos
 app.use(promocionesRoutes);
