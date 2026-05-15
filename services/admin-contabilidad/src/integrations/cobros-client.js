@@ -94,10 +94,27 @@ const cancelarCobro = async (id, motivo) => {
 
 const registrarDevolucion = async (data) => {
     try {
+        console.log(
+            '[CobrosClient] Token actual:',
+            global.currentToken
+        );
+
+        console.log(
+            '[CobrosClient] Payload:',
+            payload
+        );
         const response = await cobrosCaller.post('/devoluciones', data);
         return response.data;
     } catch (error) {
-        throw new Error(`Error registrando devolución: ${error.message}`);
+        console.log(
+            '[CobrosClient] Error status:',
+            error.response?.status
+        );
+
+        console.log(
+            '[CobrosClient] Error data:',
+            error.response?.data
+        );
     }
 };
 
