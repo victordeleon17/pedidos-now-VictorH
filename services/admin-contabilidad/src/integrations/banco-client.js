@@ -229,6 +229,16 @@ const validarTarjeta = async (data) => {
             throw new Error('card_number y cvv requeridos');
         }
 
+        console.log(
+            '[BancoClient] VALIDATE PAYLOAD:',
+            payload
+        );
+
+        console.log(
+            '[BancoClient] TOKEN:',
+            global.bankToken
+        );
+
         const response = await circuitBreaker.execute(() =>
             bancoCaller.post('/api/cards/validate', data)
         );
@@ -243,6 +253,11 @@ const validarTarjeta = async (data) => {
         if (error.message.includes('Circuit breaker')) {
             throw error;
         }
+
+        console.log(
+            '[BancoClient] VALIDATE ERROR:',
+            error.response?.data
+        );
 
     if (error.response?.status === 401) {
 
