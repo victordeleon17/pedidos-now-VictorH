@@ -134,11 +134,11 @@ const procesarReembolso = async (reembolso_id, medio_pago) => {
             const cuentaDestino =
                 validacionBanco[0];
 
-            const transferenciaBanco =
+            transferenciaBanco =
                 await bancoClient.realizarTransferencia({
 
                     source_account_id:
-                        EMPRESA_ACCOUNT_ID,
+                        process.env.EMPRESA_ACCOUNT_ID,
 
                     destination_account_id:
                         cuentaDestino.account_number,

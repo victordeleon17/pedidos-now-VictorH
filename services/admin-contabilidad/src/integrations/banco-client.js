@@ -194,7 +194,6 @@ const obtenerCuentaPorNumero = async (account_number) => {
 };
 
 // ========== TARJETAS ==========
-
 const obtenerTarjetas = async (account_number) => {
     try {
         if (!account_number) {
@@ -264,7 +263,6 @@ const validarTarjeta = async (data) => {
 };
 
 // ========== CONSULTAR SALDO ==========
-
 const consultarSaldo = async (account_number) => {
     try {
         if (!account_number) {
@@ -323,7 +321,6 @@ const consultarSaldo = async (account_number) => {
 };
 
 // ========== TOKENIZACIÓN DE TARJETA ==========
-
 const tokenizarTarjeta = async (data) => {
     if (!global.currentToken) {
         console.log('[BancoClient] Token no encontrado. Haciendo login...');
@@ -354,7 +351,6 @@ const tokenizarTarjeta = async (data) => {
 };
 
 // ========== TRANSACCIONES / COBROS (CORE) ==========
-
 const realizarCobro = async (data) => {
     if (!global.currentToken) {
         console.log('[BancoClient] Token no encontrado. Haciendo login...');

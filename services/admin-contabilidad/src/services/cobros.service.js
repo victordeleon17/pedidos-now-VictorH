@@ -61,32 +61,97 @@ const procesarCobro = async (data) => {
         // 2. TRANSICIÓN A PROCESANDO
         estadoActual = stateMachine.transition(estadoActual, 'procesando');
 
-        // 3. PROCESAR SEGÚN TIPO DE PAGO
+// 3. PROCESAR SEGÚN TIPO DE PAGO
 
-        console.log(
-            '[CobrosService] Enviando cobro a API externa...'
-        );
+// ===============================
+// PAGO CON TARJETA
+// ===============================
 
-        const cobroExterno =
-            await cobrosClient.procesarCobro(data);
+if (data.tipo_pago === 'tarjeta') {
 
-        console.log(
-            '[CobrosService] Respuesta Cobros:',
-            JSON.stringify(cobroExterno, null, 2)
-        );
+    console.log('[CobrosService] Validando tarjeta...');
 
-        cobro_realizado = true;
+    const validacion =
+        await bancoClient.validarTarjeta({
+            card_number: data.card_number,
+            cvv: data.cvv
+        });
 
-        estadoActual =
-            stateMachine.transition(
-                estadoActual,
-                'completado'
-            );
+    console.log(
+        '[CobrosService] Tarjeta válida:',
+        validacion
+    );
 
-            numero_transaccion =
-                cobroExterno?.result?.payment_id ||
-                cobroExterno?.payment_id ||
-                null;
+    console.log('[CobrosService] Tokenizando tarjeta...');
+
+    const tokenizacion =
+        await bancoClient.tokenizarTarjeta({
+            card_number: data.card_number,
+            cvv: data.cvv
+        });
+
+    console.log(
+        '[CobrosService] Token generado'
+    );
+
+    console.log('[CobrosService] Realizando cobro bancario...');
+
+    const cobroBanco =
+        await bancoClient.realizarCobro({
+            token: tokenizacion.token,
+            destination_account_id:
+                process.env.EMPRESA_ACCOUNT_ID,
+            amount: monto_final,
+            description:
+                `Pedido #${data.pedido_id}`
+        });
+
+    console.log(
+        '[CobrosService] Cobro bancario exitoso:',
+        cobroBanco
+    );
+
+    numero_transaccion =
+        cobroBanco.id;
+
+    transferencia_bancaria =
+        cobroBanco;
+}
+
+// ===============================
+// COBROS API (lógica financiera)
+// ===============================
+
+console.log(
+    '[CobrosService] Enviando cobro a API externa...'
+);
+
+const cobroExterno =
+    await cobrosClient.procesarCobro(data);
+
+console.log(
+    '[CobrosService] Respuesta Cobros:',
+    JSON.stringify(cobroExterno, null, 2)
+);
+
+cobro_realizado = true;
+
+estadoActual =
+    stateMachine.transition(
+        estadoActual,
+        'completado'
+    );
+
+// Si banco no devolvió transacción,
+// usar payment_id de Cobros API
+
+if (!numero_transaccion) {
+
+    numero_transaccion =
+        cobroExterno?.result?.payment_id ||
+        cobroExterno?.payment_id ||
+        null;
+}
 
         // 4. CREAR REGISTRO DE COBRO
         const cobro = await cobrosRepo.crearCobro(
