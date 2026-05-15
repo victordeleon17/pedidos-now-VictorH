@@ -231,7 +231,7 @@ const validarTarjeta = async (data) => {
 
         console.log(
             '[BancoClient] VALIDATE PAYLOAD:',
-            payload
+            data
         );
 
         console.log(
