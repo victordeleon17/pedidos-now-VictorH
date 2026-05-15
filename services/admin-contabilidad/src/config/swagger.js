@@ -29,6 +29,10 @@ const swaggerDefinition = {
             description: 'Movimientos financieros, ingresos, egresos y fondos'
         },
         {
+            name: 'Reportes Negocios',
+            description: 'Conexión, consultas y movimientos financieros del microservicio de Negocios'
+        },
+        {
             name: 'Reportes',
             description: 'Reportes administrativos y contables'
         },
