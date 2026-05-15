@@ -598,7 +598,7 @@ const loginBanco = async () => {
     const response = await bancoCaller.post(
         '/api/associates/login',
         {
-            username: process.env.BANK_USER,
+            user: process.env.BANK_USER,
             password: process.env.BANK_PASSWORD
         }
     );
