@@ -7,8 +7,21 @@ const {
 const crearMovimiento = async (data, transaction = null) => {
     const result = await sequelize.query(
         `INSERT INTO movimiento_financiero
-        (cuenta_id, tipo, subtipo, modulo_origen, referencia_id, monto, descripcion, pedido_id, repartidor_id, estado, fecha)
-        VALUES (:cuenta_id, :tipo, :subtipo, :modulo_origen, :referencia_id, :monto, :descripcion, :pedido_id, :repartidor_id, :estado, CURRENT_TIMESTAMP)
+        (cuenta_id, tipo, subtipo, modulo_origen,
+        referencia_id, monto, descripcion,
+        pedido_id, repartidor_id, estado, fecha,
+        transaction_id_banco,
+        payment_id_cobros,
+        idempotency_key)
+        VALUES (
+        :cuenta_id, :tipo, :subtipo, :modulo_origen,
+        :referencia_id, :monto, :descripcion,
+        :pedido_id, :repartidor_id, :estado,
+        CURRENT_TIMESTAMP,
+        :transaction_id_banco,
+        :payment_id_cobros,
+        :idempotency_key
+        )
         RETURNING *`,
         {
             replacements: {
@@ -21,7 +34,13 @@ const crearMovimiento = async (data, transaction = null) => {
                 descripcion: data.descripcion,
                 pedido_id: data.pedido_id || null,
                 repartidor_id: data.repartidor_id || null,
-                estado: data.estado || 'completado'
+                estado: data.estado || 'completado',
+                transaction_id_banco:
+                    data.transaction_id_banco || null,
+                payment_id_cobros:
+                    data.payment_id_cobros || null,
+                idempotency_key:
+                    data.idempotency_key || null
             },
             type: sequelize.QueryTypes.INSERT,
             transaction

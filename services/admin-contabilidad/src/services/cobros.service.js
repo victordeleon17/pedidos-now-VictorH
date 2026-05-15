@@ -186,7 +186,16 @@ if (!numero_transaccion) {
                 pedido_id: data.pedido_id,
                 repartidor_id: data.repartidor_id,
                 estado: estadoActual,
-                numero_transaccion
+                numero_transaccion,
+                transaction_id_banco:
+                transferencia_bancaria?.id ||
+                    numero_transaccion,
+                payment_id_cobros:
+                    cobroExterno?.result?.payment_id ||
+                    cobroExterno?.payment_id ||
+                    null,
+                idempotency_key:
+                    idempotencyKey
             },
             transaction
         );
