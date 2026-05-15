@@ -16,17 +16,12 @@ try {
     });
 
     bancoCaller.interceptors.request.use(config => {
-        console.log(
-            '[BancoClient] TOKEN EN REQUEST:',
-            global.currentToken
-        );
-
         config.headers = config.headers || {};
 
-        if (global.currentToken) {
+        if (global.bankToken) {
 
             config.headers.Authorization =
-                `Bearer ${global.currentToken}`;
+                `Bearer ${global.bankToken}`;
 
             console.log(
                 '[BancoClient] AUTH HEADER SET'
@@ -224,7 +219,7 @@ const obtenerTarjetas = async (account_number) => {
 };
 
 const validarTarjeta = async (data) => {
-    if (!global.currentToken) {
+    if (!global.bankToken) {
         console.log('[BancoClient] Token no encontrado. Haciendo login...');
         await loginBanco();
     }
@@ -322,7 +317,7 @@ const consultarSaldo = async (account_number) => {
 
 // ========== TOKENIZACIÓN DE TARJETA ==========
 const tokenizarTarjeta = async (data) => {
-    if (!global.currentToken) {
+    if (!global.bankToken) {
         console.log('[BancoClient] Token no encontrado. Haciendo login...');
         await loginBanco();
     }
@@ -352,7 +347,7 @@ const tokenizarTarjeta = async (data) => {
 
 // ========== TRANSACCIONES / COBROS (CORE) ==========
 const realizarCobro = async (data) => {
-    if (!global.currentToken) {
+    if (!global.bankToken) {
         console.log('[BancoClient] Token no encontrado. Haciendo login...');
         await loginBanco();
     }
@@ -430,7 +425,7 @@ const realizarCobro = async (data) => {
 // ========== DEPÓSITOS ==========
 
 const realizarDeposito = async (data) => {
-    if (!global.currentToken) {
+    if (!global.bankToken) {
 
         console.log(
             '[BancoClient] Token no encontrado. Haciendo login...'
@@ -483,7 +478,7 @@ const realizarDeposito = async (data) => {
 
 const realizarTransferencia = async (data) => {
     try {
-        if (!global.currentToken) {
+        if (!global.bankToken) {
             console.log('[BancoClient] Token no encontrado. Haciendo login...');
             await loginBanco();
         }
@@ -595,15 +590,15 @@ const loginBanco = async () => {
 
     console.log('[BancoClient] Ejecutando login bancario...');
 
-    console.log({
-        user: process.env.BANK_USER,
-        password: process.env.BANK_PASSWORD
-    });
+    console.log(
+        '[BancoClient] Usuario:',
+        process.env.BANK_USER
+    );
 
     const response = await bancoCaller.post(
         '/api/associates/login',
         {
-            user: process.env.BANK_USER,
+            username: process.env.BANK_USER,
             password: process.env.BANK_PASSWORD
         }
     );
@@ -620,18 +615,18 @@ const loginBanco = async () => {
         )
     );
 
-    global.currentToken = response.data.token.token;
+    global.bankToken = response.data.token.token;
 
     bancoCaller.defaults.headers.common[
         'Authorization'
-    ] = `Bearer ${global.currentToken}`;
+    ] = `Bearer ${global.bankToken}`;
 
     console.log(
         '[BancoClient] TOKEN GUARDADO:',
-        global.currentToken
+        global.bankToken
     );
 
-    return global.currentToken;
+    return global.bankToken;
 };
 
 const verificarDisponibilidad = async () => {
