@@ -28,6 +28,31 @@ const {
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               tipo:
+ *                 type: string
+ *                 example: LEALTAD
+ *               cliente_id:
+ *                 type: integer
+ *                 example: 1
+ *               tipo_descuento:
+ *                 type: string
+ *                 example: PORCENTAJE
+ *               valor_descuento:
+ *                 type: number
+ *                 example: 10
+ *               monto_minimo_pedido:
+ *                 type: number
+ *                 example: 50
+ *               origen_solicitud:
+ *                 type: string
+ *                 example: SISTEMA
+ *               solicitado_por:
+ *                 type: string
+ *                 example: proceso_lealtad_automatico
+ *               criterio_lealtad:
+ *                 type: string
+ *                 example: FRECUENCIA_PEDIDOS
  *     responses:
  *       200:
  *         description: Cupón creado correctamente
