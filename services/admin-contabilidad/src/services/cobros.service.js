@@ -156,18 +156,39 @@ if (!numero_transaccion) {
         // 4. CREAR REGISTRO DE COBRO
         const cobro = await cobrosRepo.crearCobro(
             {
-                idempotency_key: idempotencyKey,
-                cliente_id: data.cliente_id,
-                pedido_id: data.pedido_id,
-                monto_total: data.monto_total,
-                tarifa_servicio,
-                propina: data.propina || 0,
-                tipo_pago: data.tipo_pago,
-                repartidor_id: data.repartidor_id,
-                cupon_id: data.cupon_id || null,
-                estado: estadoActual,
-                numero_transaccion: numero_transaccion || null
-            },
+            idempotency_key: idempotencyKey,
+            cliente_id: data.cliente_id,
+            pedido_id: data.pedido_id,
+            monto_total: data.monto_total,
+            tarifa_servicio,
+            propina: data.propina || 0,
+            tipo_pago: data.tipo_pago,
+            repartidor_id: data.repartidor_id,
+            cupon_id: data.cupon_id || null,
+            estado: estadoActual,
+
+            numero_transaccion:
+                numero_transaccion || null,
+
+            estado_reconciliacion:
+                'reconciliado',
+
+            payment_id_cobros:
+                cobroExterno?.result?.payment_id ||
+                cobroExterno?.payment_id ||
+                null,
+
+            transaction_id_banco:
+                transferencia_bancaria?.id ||
+                numero_transaccion ||
+                null,
+
+            ultimo_error_externo:
+                null,
+
+            reconciliado:
+                true
+        },
             transaction
         );
 

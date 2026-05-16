@@ -6,9 +6,27 @@ const crearCobro = async (data, transaction = null) => {
     const result = await sequelize.query(
         `INSERT INTO cobro
         (cliente_id, pedido_id, monto_total, tarifa_servicio, propina, 
-        tipo_pago, repartidor_id, cupon_id, estado, idempotency_key)
-        VALUES (:cliente_id, :pedido_id, :monto_total, :tarifa_servicio, :propina,
-        :tipo_pago, :repartidor_id, :cupon_id, :estado, :idempotency_key)
+        tipo_pago, repartidor_id, cupon_id, estado, numero_transaccion,
+        idempotency_key, estado_reconciliacion, payment_id_cobros,
+        transaction_id_banco, ultimo_error_externo, reconciliado)
+        VALUES (
+            :cliente_id,
+            :pedido_id,
+            :monto_total,
+            :tarifa_servicio,
+            :propina,
+            :tipo_pago,
+            :repartidor_id,
+            :cupon_id,
+            :estado,
+            :numero_transaccion,
+            :idempotency_key,
+            :estado_reconciliacion,
+            :payment_id_cobros,
+            :transaction_id_banco,
+            :ultimo_error_externo,
+            :reconciliado
+        )
         RETURNING *`,
         {
             replacements: {
@@ -21,7 +39,22 @@ const crearCobro = async (data, transaction = null) => {
                 repartidor_id: data.repartidor_id || null,
                 cupon_id: data.cupon_id || null,
                 estado: data.estado || 'completado',
-                idempotency_key: data.idempotency_key
+                numero_transaccion: data.numero_transaccion || null,
+                idempotency_key: data.idempotency_key,
+                estado_reconciliacion:
+                    data.estado_reconciliacion || 'pendiente',
+
+                payment_id_cobros:
+                    data.payment_id_cobros || null,
+
+                transaction_id_banco:
+                    data.transaction_id_banco || null,
+
+                ultimo_error_externo:
+                    data.ultimo_error_externo || null,
+
+                reconciliado:
+                    data.reconciliado || false
             },
             type: sequelize.QueryTypes.INSERT,
             transaction
