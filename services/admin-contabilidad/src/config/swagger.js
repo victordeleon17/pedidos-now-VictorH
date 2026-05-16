@@ -51,6 +51,23 @@ const swaggerDefinition = {
         {
             name: 'Dashboard',
             description: 'Indicadores generales del módulo'
+        }, 
+        //Admin-conta Jeff. Daniel Ramos
+        {
+            name: 'Cupones',
+            description: 'Gestión administrativa de cupones'
+        },
+        {
+            name: 'Promociones',
+            description: 'Gestión de promociones generales'
+        },
+        {
+            name: 'Promociones Flash',
+            description: 'Gestión de promociones flash'
+        },
+        {
+            name: 'Reportes Promociones',
+            description: 'Reportes y sincronización de promociones'
         }
     ],
     components: {
