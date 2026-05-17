@@ -28,9 +28,9 @@ if (process.env.LOG_REQUESTS === "true") {
   });
 }
 
-app.use("/api", healthRoutes);
-app.use("/api", paymentsRoutes);
-app.use("/api", walletRoutes);
+app.use("/api/cobros", healthRoutes);
+app.use("/api/cobros", paymentsRoutes);
+app.use("/api/cobros", walletRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

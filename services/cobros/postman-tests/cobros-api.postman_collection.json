@@ -1,40 +1,95 @@
 {
   "info": {
     "_postman_id": "55d6e5b7-1ad9-4551-944b-c4eb4f78ef7c",
-    "name": "cobros-api",
-    "description": "Coleccion actualizada para Cobros API desplegada en Fly.io y conectada a Neon/PostgreSQL.",
+    "name": "Cobros API - Restaurantes",
+    "description": "Coleccion para que Restaurantes consulte y use Cobros. Base path: /api. Todas las respuestas exitosas siguen { ok: true, result: ... }. Los errores siguen { ok: false, error: string }.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "Health",
+      "name": "00 - Health",
+      "description": "Verifica que Cobros este arriba y conectado a base de datos.",
       "item": [
         {
-          "name": "Healthcheck",
+          "name": "GET /api/health - estado del servicio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('servicio cobros saludable', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.service).to.eql('cobros');",
+                  "  pm.expect(json.db).to.eql('ok');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
+            "description": "Restaurantes puede usar este endpoint para validar disponibilidad antes de enviar ordenes a Cobros. Respuesta esperada: { ok: true, service: 'cobros', db: 'ok' }.",
             "url": {
               "raw": "{{baseUrl}}/api/health",
               "host": ["{{baseUrl}}"],
               "path": ["api", "health"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": "{{baseUrl}}/api/health"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": true,\n  \"service\": \"cobros\",\n  \"db\": \"ok\"\n}"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Payments",
+      "name": "01 - Restaurantes / Cobros",
+      "description": "Endpoints principales para Restaurantes: calcular total, crear cobro, consultar cobros por orden/reserva/id, cancelar y reembolsar.",
       "item": [
         {
-          "name": "Calculate total",
+          "name": "POST /api/payments/calculate - calcular total antes de confirmar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('respuesta ok con totales', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result).to.include.keys('subtotal', 'total_discounts', 'service_fee', 'weight_fee', 'insurance_fee', 'priority_fee', 'tip_amount', 'total_amount');",
+                  "});",
+                  "pm.test('total esperado para payload ejemplo', () => {",
+                  "  pm.expect(json.result.subtotal).to.eql(95);",
+                  "  pm.expect(json.result.total_amount).to.eql(122);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Usar cuando Restaurante necesita previsualizar el total que Cobros calculara antes de crear el pago. Campos requeridos por item: product_id, product_name, quantity > 0, unit_price >= 0. Campos monetarios opcionales deben ser >= 0. No crea registros.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    },\n    {\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\n      \"product_name\": \"Papas\",\n      \"quantity\": 1,\n      \"unit_price\": 15,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0\n}",
+              "raw": "{\n  \"items\": [\n    {\n      \"product_id\": \"{{productId1}}\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    },\n    {\n      \"product_id\": \"{{productId2}}\",\n      \"product_name\": \"Papas\",\n      \"quantity\": 1,\n      \"unit_price\": 15,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"priority_shipping\": false,\n  \"apply_weather_surcharge\": false,\n  \"apply_traffic_surcharge\": false\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -43,21 +98,56 @@
               "path": ["api", "payments", "calculate"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK - totales calculados",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": "{{baseUrl}}/api/payments/calculate"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": true,\n  \"result\": {\n    \"subtotal\": 95,\n    \"items_discount_total\": 0,\n    \"product_discounts\": 0,\n    \"coupon_discount\": 0,\n    \"total_discounts\": 0,\n    \"service_fee\": 5,\n    \"weight_lbs\": 12,\n    \"weight_fee\": 12,\n    \"weather_traffic_fee\": 0,\n    \"insurance_fee\": 0,\n    \"priority_fee\": 0,\n    \"tip_amount\": 10,\n    \"total_amount\": 122\n  }\n}"
+            },
+            {
+              "name": "400 Bad Request - payload invalido",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{\n  \"items\": []\n}" },
+                "url": "{{baseUrl}}/api/payments/calculate"
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": false,\n  \"error\": \"items is required and must be a non-empty array\"\n}"
+            }
+          ]
         },
         {
-          "name": "Create payment - CARD_CREDIT",
+          "name": "POST /api/payments - crear cobro con tarjeta",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
                   "const json = pm.response.json();",
-                  "const result = json.result || {};",
-                  "if (result.payment_id) pm.collectionVariables.set('paymentId', result.payment_id);",
-                  "if (result.order_snapshot_id) pm.collectionVariables.set('orderSnapshotId', result.order_snapshot_id);",
-                  "if (result.reservation_id) pm.collectionVariables.set('reservationId', result.reservation_id);"
+                  "pm.test('cobro aprobado', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result.status).to.eql('APPROVED');",
+                  "  pm.expect(json.result.settlement_status).to.eql('NOT_APPLICABLE');",
+                  "  pm.expect(json.result.payment_id).to.be.a('string');",
+                  "});",
+                  "if (json.result?.payment_id) pm.collectionVariables.set('paymentId', json.result.payment_id);",
+                  "if (json.result?.order_snapshot_id) pm.collectionVariables.set('orderSnapshotId', json.result.order_snapshot_id);",
+                  "if (json.result?.reservation_id) pm.collectionVariables.set('reservationId', json.result.reservation_id);"
                 ]
               }
             }
@@ -65,9 +155,64 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Crea el cobro definitivo para una orden de Restaurante pagada con tarjeta. Requeridos: customer_id, courier_id, business_id, delivery_address_id, reservation_id, payment_method_code, idempotency_key e items validos. Para CARD_CREDIT/CARD_DEBIT tambien enviar card_type. Respuesta exitosa: 201 con payment_id, order_snapshot_id, reservation_id, status APPROVED, settlement_status y totals.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customer_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"cccccccc-cccc-cccc-cccc-cccccccccccc\",\n  \"delivery_address_id\": \"dddddddd-dddd-dddd-dddd-dddddddddddd\",\n  \"reservation_id\": \"RES-CARD-{{timestamp}}\",\n  \"order_id\": \"ORD-CARD-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"CARD_CREDIT\",\n  \"card_type\": \"CREDIT\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"items\": [\n    {\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\n      \"external_product_id\": \"PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    },\n    {\n      \"product_id\": \"22222222-2222-2222-2222-222222222222\",\n      \"external_product_id\": \"PROD-11\",\n      \"product_name\": \"Papas\",\n      \"quantity\": 1,\n      \"unit_price\": 15,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"idem-card-{{timestamp}}\"\n}",
+              "raw": "{\n  \"customer_id\": \"{{customerId}}\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"{{businessId}}\",\n  \"delivery_address_id\": \"{{deliveryAddressId}}\",\n  \"reservation_id\": \"RES-REST-{{timestamp}}\",\n  \"order_id\": \"ORD-REST-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"CARD_CREDIT\",\n  \"card_type\": \"CREDIT\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"priority_shipping\": false,\n  \"apply_weather_surcharge\": false,\n  \"apply_traffic_surcharge\": false,\n  \"items\": [\n    {\n      \"product_id\": \"{{productId1}}\",\n      \"external_product_id\": \"REST-PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    },\n    {\n      \"product_id\": \"{{productId2}}\",\n      \"external_product_id\": \"REST-PROD-11\",\n      \"product_name\": \"Papas\",\n      \"quantity\": 1,\n      \"unit_price\": 15,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"rest-card-{{timestamp}}\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created - cobro aprobado",
+              "originalRequest": {
+                "method": "POST",
+                "header": [{ "key": "Content-Type", "value": "application/json" }],
+                "body": { "mode": "raw", "raw": "{}" },
+                "url": "{{baseUrl}}/api/payments"
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": true,\n  \"result\": {\n    \"payment_id\": \"uuid-del-pago\",\n    \"order_snapshot_id\": \"uuid-del-snapshot\",\n    \"reservation_id\": \"RES-REST-1710000000000\",\n    \"status\": \"APPROVED\",\n    \"settlement_status\": \"NOT_APPLICABLE\",\n    \"totals\": {\n      \"subtotal\": 95,\n      \"total_discounts\": 0,\n      \"service_fee\": 5,\n      \"weight_fee\": 12,\n      \"tip_amount\": 10,\n      \"total_amount\": 122\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "POST /api/payments - crear cobro en efectivo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+                  "const json = pm.response.json();",
+                  "pm.test('cobro cash queda pendiente de liquidacion', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result.status).to.eql('APPROVED');",
+                  "  pm.expect(json.result.settlement_status).to.eql('PENDING');",
+                  "});",
+                  "if (json.result?.payment_id) pm.collectionVariables.set('paymentId', json.result.payment_id);",
+                  "if (json.result?.order_snapshot_id) pm.collectionVariables.set('orderSnapshotId', json.result.order_snapshot_id);",
+                  "if (json.result?.reservation_id) pm.collectionVariables.set('reservationId', json.result.reservation_id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Crea cobro cuando el cliente paga en efectivo al courier. Cobros registra deuda pendiente del courier con la app. Respuesta esperada: status APPROVED y settlement_status PENDING.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_id\": \"{{customerId}}\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"{{businessId}}\",\n  \"delivery_address_id\": \"{{deliveryAddressId}}\",\n  \"reservation_id\": \"RES-CASH-{{timestamp}}\",\n  \"order_id\": \"ORD-CASH-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"CASH\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"items\": [\n    {\n      \"product_id\": \"{{productId1}}\",\n      \"external_product_id\": \"REST-PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"rest-cash-{{timestamp}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -79,18 +224,20 @@
           "response": []
         },
         {
-          "name": "Create payment - CASH",
+          "name": "POST /api/payments - crear cobro con cupon",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
                   "const json = pm.response.json();",
-                  "const result = json.result || {};",
-                  "if (result.payment_id) pm.collectionVariables.set('paymentId', result.payment_id);",
-                  "if (result.order_snapshot_id) pm.collectionVariables.set('orderSnapshotId', result.order_snapshot_id);",
-                  "if (result.reservation_id) pm.collectionVariables.set('reservationId', result.reservation_id);"
+                  "pm.test('cupon aprobado', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result.status).to.eql('APPROVED');",
+                  "});",
+                  "if (json.result?.payment_id) pm.collectionVariables.set('paymentId', json.result.payment_id);"
                 ]
               }
             }
@@ -98,9 +245,10 @@
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Crea cobro usando metodo COUPON. Requiere coupon_discount > 0 y el total final debe mantenerse mayor que 0.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"customer_id\": \"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"cccccccc-cccc-cccc-cccc-cccccccccccc\",\n  \"delivery_address_id\": \"dddddddd-dddd-dddd-dddd-dddddddddddd\",\n  \"reservation_id\": \"RES-CASH-{{timestamp}}\",\n  \"order_id\": \"ORD-CASH-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"CASH\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 0,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"items\": [\n    {\n      \"product_id\": \"11111111-1111-1111-1111-111111111111\",\n      \"external_product_id\": \"PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"idem-cash-{{timestamp}}\"\n}",
+              "raw": "{\n  \"customer_id\": \"{{customerId}}\",\n  \"courier_id\": \"{{courierId}}\",\n  \"business_id\": \"{{businessId}}\",\n  \"delivery_address_id\": \"{{deliveryAddressId}}\",\n  \"reservation_id\": \"RES-COUPON-{{timestamp}}\",\n  \"order_id\": \"ORD-COUPON-{{timestamp}}\",\n  \"currency_code\": \"GTQ\",\n  \"payment_method_code\": \"COUPON\",\n  \"product_discounts\": 0,\n  \"coupon_discount\": 10,\n  \"service_fee\": 5,\n  \"courier_earned_fee\": 15,\n  \"approved_extra_fee\": 0,\n  \"tip_amount\": 10,\n  \"weight_lbs\": 12,\n  \"insurance_value\": 0,\n  \"items\": [\n    {\n      \"product_id\": \"{{productId1}}\",\n      \"external_product_id\": \"REST-PROD-10\",\n      \"product_name\": \"Hamburguesa\",\n      \"quantity\": 2,\n      \"unit_price\": 40,\n      \"item_discount\": 0,\n      \"is_combo\": false\n    }\n  ],\n  \"idempotency_key\": \"rest-coupon-{{timestamp}}\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -112,24 +260,52 @@
           "response": []
         },
         {
-          "name": "List payments",
+          "name": "GET /api/payments?orderId=... - consultar cobro por orden del restaurante",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('lista de pagos', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
+            "description": "Restaurantes debe usar este endpoint para reconciliar por su order_id externo. Query soportados: reservationId, orderSnapshotId, orderId, courierId.",
             "url": {
-              "raw": "{{baseUrl}}/api/payments?courierId={{courierId}}",
+              "raw": "{{baseUrl}}/api/payments?orderId={{orderId}}",
               "host": ["{{baseUrl}}"],
               "path": ["api", "payments"],
-              "query": [{ "key": "courierId", "value": "{{courierId}}" }]
+              "query": [{ "key": "orderId", "value": "{{orderId}}" }]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK - lista",
+              "originalRequest": { "method": "GET", "header": [], "url": "{{baseUrl}}/api/payments?orderId={{orderId}}" },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": true,\n  \"result\": [\n    {\n      \"id\": \"uuid-del-pago\",\n      \"order_id\": \"ORD-REST-1710000000000\",\n      \"reservation_id\": \"RES-REST-1710000000000\",\n      \"order_total_amount\": \"122.00\",\n      \"settlement_status\": \"NOT_APPLICABLE\",\n      \"paymentMethod\": { \"code\": \"CARD_CREDIT\" },\n      \"status\": { \"code\": \"APPROVED\" }\n    }\n  ]\n}"
+            }
+          ]
         },
         {
-          "name": "List payments by reservation",
+          "name": "GET /api/payments?reservationId=... - consultar por reserva",
           "request": {
             "method": "GET",
             "header": [],
+            "description": "Consulta cobros por reservation_id cuando Restaurante maneja reservas como identificador principal.",
             "url": {
               "raw": "{{baseUrl}}/api/payments?reservationId={{reservationId}}",
               "host": ["{{baseUrl}}"],
@@ -140,10 +316,27 @@
           "response": []
         },
         {
-          "name": "Get payment by id",
+          "name": "GET /api/payments/:paymentId - detalle completo del cobro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('detalle incluye snapshot e items', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result).to.include.keys('id', 'orderSnapshot', 'paymentMethod', 'status');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
+            "description": "Devuelve el detalle completo de un pago: metodo, estado, intentos, snapshot financiero de orden e items. Si no existe: 404 { ok: false, error: 'Payment not found' }.",
             "url": {
               "raw": "{{baseUrl}}/api/payments/{{paymentId}}",
               "host": ["{{baseUrl}}"],
@@ -153,13 +346,30 @@
           "response": []
         },
         {
-          "name": "Cancel payment",
+          "name": "PATCH /api/payments/:paymentId/cancel - cancelar cobro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('cobro cancelado', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result.status).to.eql('CANCELLED');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "PATCH",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Cancela un cobro existente y ajusta wallet del courier. No se puede cancelar si ya esta CANCELLED o REFUNDED. El campo reason es opcional pero no puede venir vacio.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"reason\": \"Cancelled from Postman\"\n}",
+              "raw": "{\n  \"reason\": \"Orden cancelada por Restaurante\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -168,16 +378,43 @@
               "path": ["api", "payments", "{{paymentId}}", "cancel"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK - cancelado",
+              "originalRequest": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": "{{baseUrl}}/api/payments/{{paymentId}}/cancel" },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": true,\n  \"result\": {\n    \"payment_id\": \"uuid-del-pago\",\n    \"status\": \"CANCELLED\",\n    \"cancellation_reason\": \"Orden cancelada por Restaurante\"\n  }\n}"
+            }
+          ]
         },
         {
-          "name": "Refund payment",
+          "name": "POST /api/payments/:paymentId/refund - reembolso parcial o total",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('reembolso aplicado', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(['PARTIALLY_REFUNDED', 'REFUNDED']).to.include(json.result.status);",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Aplica reembolso. amount es requerido y debe ser > 0. Si amount es menor al saldo reembolsable devuelve PARTIALLY_REFUNDED; si cubre todo devuelve REFUNDED. No permite reembolsar mas que el saldo disponible.",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 10,\n  \"reason\": \"Refund from Postman\"\n}",
+              "raw": "{\n  \"amount\": 10,\n  \"reason\": \"Producto no entregado por Restaurante\"\n}",
               "options": { "raw": { "language": "json" } }
             },
             "url": {
@@ -186,24 +423,39 @@
               "path": ["api", "payments", "{{paymentId}}", "refund"]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK - reembolso parcial",
+              "originalRequest": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{}" }, "url": "{{baseUrl}}/api/payments/{{paymentId}}/refund" },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"ok\": true,\n  \"result\": {\n    \"payment_id\": \"uuid-del-pago\",\n    \"status\": \"PARTIALLY_REFUNDED\",\n    \"refunded_amount\": 10,\n    \"total_refunded\": 10,\n    \"refundable_balance\": 112\n  }\n}"
+            }
+          ]
         }
       ]
     },
     {
-      "name": "Wallet",
+      "name": "02 - Courier Wallet / Soporte operativo",
+      "description": "Endpoints de wallet utiles para revisar deuda por efectivo y liquidarla. Normalmente los consume app de courier/admin, no Restaurante directamente.",
       "item": [
         {
-          "name": "Get wallet summary",
+          "name": "GET /api/wallet/summary - resumen de courier",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
                   "const json = pm.response.json();",
-                  "const txs = json.result?.transactions || [];",
-                  "const pendingCash = txs.find(t => t.paymentMethod === 'CASH' && t.isDebtSettled === false);",
+                  "pm.test('wallet summary valido', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result).to.include.keys('balances', 'morosityState', 'transactions');",
+                  "});",
+                  "const pendingCash = json.result.transactions.find(t => t.paymentMethod === 'CASH' && t.isDebtSettled === false);",
                   "if (pendingCash?.transactionId) pm.collectionVariables.set('cashDebtTransactionId', pendingCash.transactionId);",
                   "if (pendingCash?.orderId) pm.collectionVariables.set('cashDebtOrderId', pendingCash.orderId);"
                 ]
@@ -213,6 +465,7 @@
           "request": {
             "method": "GET",
             "header": [],
+            "description": "Consulta balances y transacciones del courier. Requiere courierId. Puede filtrarse con startDate y endDate en formato YYYY-MM-DD.",
             "url": {
               "raw": "{{baseUrl}}/api/wallet/summary?courierId={{courierId}}",
               "host": ["{{baseUrl}}"],
@@ -223,10 +476,11 @@
           "response": []
         },
         {
-          "name": "Get wallet summary by date range",
+          "name": "GET /api/wallet/summary - con rango de fechas",
           "request": {
             "method": "GET",
             "header": [],
+            "description": "Misma consulta de wallet filtrada por fecha de creacion de transacciones.",
             "url": {
               "raw": "{{baseUrl}}/api/wallet/summary?courierId={{courierId}}&startDate=2026-01-01&endDate=2026-12-31",
               "host": ["{{baseUrl}}"],
@@ -241,10 +495,27 @@
           "response": []
         },
         {
-          "name": "Pay pending by transactionId",
+          "name": "POST /api/wallet/pay-pending - liquidar deuda por transactionId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('deuda saldada', () => {",
+                  "  pm.expect(json.ok).to.eql(true);",
+                  "  pm.expect(json.result.message).to.be.a('string');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Liquida una deuda CASH pendiente del courier usando transactionId obtenido desde wallet summary.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"transactionId\": \"{{cashDebtTransactionId}}\"\n}",
@@ -259,10 +530,11 @@
           "response": []
         },
         {
-          "name": "Pay pending by orderId",
+          "name": "POST /api/wallet/pay-pending - liquidar deuda por orderId",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "description": "Liquida una deuda CASH pendiente usando orderId del cash debt.",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"courierId\": \"{{courierId}}\",\n  \"orderId\": \"{{cashDebtOrderId}}\"\n}",
@@ -285,26 +557,26 @@
       "script": {
         "type": "text/javascript",
         "exec": [
-          "pm.collectionVariables.set('timestamp', Date.now());"
+          "pm.collectionVariables.set('timestamp', Date.now());",
+          "pm.collectionVariables.set('orderId', `ORD-REST-${pm.collectionVariables.get('timestamp')}`);"
         ]
-      }
-    },
-    {
-      "listen": "test",
-      "script": {
-        "type": "text/javascript",
-        "exec": []
       }
     }
   ],
   "variable": [
-    { "key": "baseUrl", "value": "https://cobros-api.fly.dev" },
-    { "key": "courierId", "value": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb" },
-    { "key": "paymentId", "value": "" },
-    { "key": "orderSnapshotId", "value": "" },
-    { "key": "reservationId", "value": "" },
-    { "key": "cashDebtTransactionId", "value": "" },
-    { "key": "cashDebtOrderId", "value": "" },
-    { "key": "timestamp", "value": "" }
+    { "key": "baseUrl", "value": "https://cobros-api.fly.dev", "type": "string" },
+    { "key": "customerId", "value": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "type": "string" },
+    { "key": "courierId", "value": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "type": "string" },
+    { "key": "businessId", "value": "cccccccc-cccc-cccc-cccc-cccccccccccc", "type": "string" },
+    { "key": "deliveryAddressId", "value": "dddddddd-dddd-dddd-dddd-dddddddddddd", "type": "string" },
+    { "key": "productId1", "value": "11111111-1111-1111-1111-111111111111", "type": "string" },
+    { "key": "productId2", "value": "22222222-2222-2222-2222-222222222222", "type": "string" },
+    { "key": "paymentId", "value": "", "type": "string" },
+    { "key": "orderSnapshotId", "value": "", "type": "string" },
+    { "key": "reservationId", "value": "", "type": "string" },
+    { "key": "orderId", "value": "", "type": "string" },
+    { "key": "cashDebtTransactionId", "value": "", "type": "string" },
+    { "key": "cashDebtOrderId", "value": "", "type": "string" },
+    { "key": "timestamp", "value": "", "type": "string" }
   ]
 }
